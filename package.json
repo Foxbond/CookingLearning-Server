@@ -1,0 +1,14 @@
+{
+	"name": "CookingLearning-Server",
+	"version": "1.0.0",
+	"description": "CookingLearning-Server",
+	"homepage": "https://github.com/Foxbond/CookingLearning-Server",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Foxbond/CookingLearning-Server.git"
+	},
+	"private": true,
+	"dependencies": {
+		"express": "^4.16.3"
+	}
+}
