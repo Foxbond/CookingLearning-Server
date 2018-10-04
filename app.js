@@ -59,6 +59,12 @@ logFileOnly.stream = {
 	}
 };
 
+/******************** MySQL ********************/
+var mysql      = require('mysql');
+db = mysql.createPool(require('./config/mysql.cfg'));
+
+
+
 /******************** Routes ********************/
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
