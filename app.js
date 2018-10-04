@@ -66,6 +66,15 @@ var loginRouter = require('./routes/login');
 /******************** Express ********************/
 var app = express();
 
+//Let's meet
+app.disable('x-powered-by');
+app.use(function(req, res, next){
+	res.setHeader('Server', 'Hidden');
+	res.setHeader('X-Powered-By', 'Hidden');
+	/* res.setHeader('Access-Control-Allow-Origin', ''); */
+	next();
+});
+
 // tpl engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
