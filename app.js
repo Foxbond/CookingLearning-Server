@@ -1,9 +1,11 @@
-var path = require('path');
+//global
+path = require('path');
 
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var sessions = require("client-sessions");
-var createError = require('http-errors');
+//global
+createError = require('http-errors');
 
 
 /******************** Logging ********************/
@@ -26,13 +28,13 @@ var winstonTransportFile = new winston.transports.DailyRotateFile({
 			)
 });
 
-//var keyword intentionally omitted
+//global
 logFileOnly = winston.createLogger({
     transports: [winstonTransportFile],
 	exitOnError: false
 });
 
-//var keyword intentionally omitted
+//global
 log = winston.createLogger({
     transports: [
 		winstonTransportFile,
@@ -53,6 +55,7 @@ log = winston.createLogger({
 	exitOnError: false
 });
 
+//global
 logFileOnly.stream = {
 	write: function(message, encoding){
 		logFileOnly.info(message);
@@ -61,12 +64,12 @@ logFileOnly.stream = {
 
 /******************** MySQL ********************/
 var mysql      = require('mysql');
+//global
 db = mysql.createPool(require('./config/mysql.cfg'));
-
-
 
 /******************** Routes ********************/
 var indexRouter = require('./routes/index');
+var adminRouter = require('./routes/admin');
 var loginRouter = require('./routes/login');
 
 /******************** Express ********************/
@@ -103,6 +106,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/admin', adminRouter);
 app.use('/login', loginRouter);
 
 // catch 404 and forward to error handler

@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/logout', function(req, res, next) {
-	if (!req.session){
+	if (!req.session || !req.session.user){
 		return res.redirect('/');
 	}
 	
@@ -22,11 +22,11 @@ router.get('/logout', function(req, res, next) {
 
 router.post('/', function(req, res, next) {
 	
-	if (req.body.login.trim() == 'fox'){
-		req.session.user = 'fox';
+	if (req.body.password.trim() == 'fox'){
+		req.session.user = req.body.login;
 		return res.json({success: true});
 	}else{
-		return res.json({err: "unknownUser"});
+		return res.json({err: "invalidPassword"});
 	}
 	
 	return res.json({err: "notImplemented"});
