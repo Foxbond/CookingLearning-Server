@@ -14,6 +14,10 @@ router.all('*', function(req, res, next){
 	next();
 });
 
+router.get('/', function(req, res) {
+	res.render('admin/index');
+});
+
 router.get('/', function(req, res, next) {
 	res.render('admin/index');
 });

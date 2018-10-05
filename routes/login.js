@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
 	if (req.session && req.session.user){
 		return res.redirect('/');
 	}
@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 	return res.render('login', { title: 'Login' });
 });
 
-router.get('/logout', function(req, res, next) {
+router.get('/logout', function(req, res) {
 	if (!req.session || !req.session.user){
 		return res.redirect('/');
 	}
@@ -20,7 +20,7 @@ router.get('/logout', function(req, res, next) {
 	return res.redirect('/');
 });
 
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
 	
 	if (req.body.password.trim() == 'fox'){
 		req.session.user = req.body.login;
