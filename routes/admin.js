@@ -61,4 +61,17 @@ router.post('/createUser', function(req, res, next) {
 	});
 });//router.post('/createUser'
 
+router.get('/listUsers', function(req, res) {
+	
+	db.query('SELECT * from users', function (err, data){
+		if (err){
+			log.error('DB Query error! ("'+err+'")');
+			return next(createError(500)); 
+		}
+		console.log(data);
+		res.render('admin/listUsers', {users:data});
+	});
+	
+});//router.get('/listUsers'
+
 module.exports = router;

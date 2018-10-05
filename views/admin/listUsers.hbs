@@ -1,0 +1,18 @@
+<h1>Admin -> ListUsers</h1>
+<p>
+	<table>
+		<tr>
+			<td>userId</td>
+			<td>userMail</td>
+			<td>userName</td>
+		</tr>
+		{{#each users}}
+		<tr>
+			<td>{{userId}}</td>
+			<td>{{userMail}}</td>
+			<td>{{userName}}</td>
+		</tr>
+		{{/each}}
+	</table>
+	<a href="/admin">Admin - Index</a><br>
+</p>
