@@ -1,0 +1,11 @@
+<h1>Admin -> CreateUser</h1>
+<p>{{message}}</p>
+<p>
+	<form method="post">
+		Mail: <input type="text" name="userMail" value="{{_form.mail}}"><br>
+		Name: <input type="text" name="userName" value="{{_form.name}}"><br>
+		Password: <input type="password" name="userPassword" value="{{_form.password}}"><br>
+		<input type="submit" value="Add"><br>
+	</form>
+	<a href="/admin">Admin - Index</a><br>
+</p>
