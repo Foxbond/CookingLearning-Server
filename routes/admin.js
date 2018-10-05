@@ -68,7 +68,6 @@ router.get('/listUsers', function(req, res) {
 			log.error('DB Query error! ("'+err+'")');
 			return next(createError(500)); 
 		}
-		console.log(data);
 		res.render('admin/listUsers', {users:data});
 	});
 	
