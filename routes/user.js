@@ -3,28 +3,18 @@ var bcrypt = require('bcrypt-nodejs');
 var express = require('express');
 var router = express.Router();
 
-router.get('/', function(req, res) {
+router.get('/login', function(req, res) {
 	if (req.session && req.session.user){
-		return res.redirect('/');
+		return res.redirect('/user');
 	}
 	
-	return res.render('login');
-});
+	return res.render('user/login');
+});//router.get('/login'
 
-router.get('/logout', function(req, res) {
-	if (!req.session || !req.session.user){
-		return res.redirect('/');
-	}
-	
-	req.session.reset();
-	
-	return res.redirect('/');
-});
-
-router.post('/', function(req, res, next) {
+router.post('/login', function(req, res, next) {
 	
 	if (!req.body.userMail || !req.body.userPassword){
-		return res.render('login', {message:'Fill all fields'});
+		return res.render('user/login', {message:'Fill all fields'});
 	}
 	
 	//TODO: Sanitize input
@@ -48,13 +38,35 @@ router.post('/', function(req, res, next) {
 			}
 			
 			if (!compareResult){
-				return res.render('login', {message:'Invalid password'});// There is no need to hide this information behind something like "unknown user and/or password"
+				return res.render('user/login', {message:'Invalid password'});// There is no need to hide this information behind something like "unknown user and/or password"
 			}
 			
 			req.session.user = data[0].userName;
 			return res.redirect('/');
 		});
 	});
-});
+});//router.post('/login'
+
+router.all('*', function(req, res, next){
+	if (!req.session || !req.session.user){
+		return res.redirect('/user/login');
+	}
+	
+	res.locals.title = 'User';
+	
+	next();
+});//router.all('*'
+
+router.get('/', function(req, res) {
+	
+	return res.render('user', {username:req.session.user});
+});//router.get('/'
+
+router.get('/logout', function(req, res) {
+	
+	req.session.reset();
+	
+	return res.redirect('/');
+});//router.get('/logout'
 
 module.exports = router;

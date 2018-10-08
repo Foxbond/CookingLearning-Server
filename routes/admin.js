@@ -5,7 +5,7 @@ var router = express.Router();
 
 router.all('*', function(req, res, next){
 	if (!req.session || !req.session.user){
-		return res.redirect('/login');
+		return res.redirect('/user/login');
 	}
 	
 	if (req.session.user.toLowerCase() != 'foxbond'){
