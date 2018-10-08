@@ -13,11 +13,18 @@ router.all('*', function(req, res, next){
 		return next(createError(403));
 	}
 	
+	res.locals.title = 'Admin';
+	
 	next();
-});
+});//router.all('*'
 
 router.get('/', function(req, res) {
-	res.render('admin/index');
+	res.render('admin/index', {title: 'Admin - Index'});
+});
+
+router.all('/createUser', function (req, res, next){
+	res.locals.title = 'Admin - CreateUser';
+	next();
 });
 
 router.get('/createUser', function(req, res) {
@@ -86,7 +93,10 @@ router.get('/listUsers', function(req, res) {
 			log.error('DB Query error! ("'+err+'")');
 			return next(createError(500)); 
 		}
-		res.render('admin/listUsers', {users:data});
+		res.render('admin/listUsers', {
+			title: 'Admin - ListUsers',
+			users:data
+		});
 	});
 	
 });//router.get('/listUsers'
