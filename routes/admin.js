@@ -48,14 +48,32 @@ router.post('/createUser', function(req, res, next) {
 			return next(createError(500)); 
 		}
 		
-		db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err){
+		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function(err, data){
 			if (err){
 				log.error('DB Query error! ("'+err+'")');
 				return next(createError(500)); 
 			}
 			
-			res.render('admin/createUser', {
-				message: 'User "'+userName+'" added!'
+			if (data[0].c != 0){
+				return res.render('admin/createUser', { 
+					message: 'Mail already used!', 
+					_form: {
+						mail: req.body.userMail,
+						name: req.body.userName,
+						password: req.body.userPassword
+					}
+				});
+			}
+			
+			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err){
+				if (err){
+					log.error('DB Query error! ("'+err+'")');
+					return next(createError(500)); 
+				}
+				
+				res.render('admin/createUser', {
+					message: 'User "'+userName+'" added!'
+				});
 			});
 		});
 	});
