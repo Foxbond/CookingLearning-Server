@@ -1,11 +1,12 @@
 //global
 path = require('path');
+createError = require('http-errors');
 
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var sessions = require("client-sessions");
-//global
-createError = require('http-errors');
+var exphbs = require("express-handlebars");
+
 
 
 /******************** Logging ********************/
@@ -85,8 +86,14 @@ app.use(function(req, res, next){
 });
 
 // tpl engine
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+app.engine("hbs", exphbs({
+	defaultLayout: "main",
+	extname: ".hbs",
+	helpers: require("./public/js/helpers.js").helpers, // same file that gets used on our client
+	partialsDir: "views/partials/", // same as default
+	layoutsDir: "views/layouts/" // same as default
+}));
+app.set("view engine", "hbs");
 
 // http logging
 app.use(morgan('combined', { "stream": logFileOnly.stream }));
