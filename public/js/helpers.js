@@ -3,6 +3,18 @@ var register = function(Handlebars) {
 		// put all of helpers inside this object
 		'default': function (a, b) {
 			return a ? a : b;
+		},
+		length: function(value) {
+			if (typeof value === 'object') {
+				value = Object.keys(value);
+			}
+			if (typeof value === 'string' || Array.isArray(value)) {
+				return value.length;
+			}
+			return 0;
+		},
+		a: function (url, text) {
+			return '<a href="'+url+'">'+text+'</a>';
 		}
 	};
 
