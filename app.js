@@ -1,13 +1,12 @@
+var express = require('express');
+var cookieParser = require('cookie-parser');
+var sessions = require('client-sessions');
+var exphbs = require('express-handlebars');
+
 //global
 path = require('path');
 createError = require('http-errors');
-
-var express = require('express');
-var cookieParser = require('cookie-parser');
-var sessions = require("client-sessions");
-var exphbs = require("express-handlebars");
-
-
+validate = require('./public/js/validate.js');
 
 /******************** Logging ********************/
 var morgan = require('morgan');
@@ -86,14 +85,14 @@ app.use(function(req, res, next){
 });
 
 // tpl engine
-app.engine("hbs", exphbs({
-	defaultLayout: "main",
-	extname: ".hbs",
-	helpers: require("./public/js/helpers.js").helpers, // same file that gets used on our client
-	partialsDir: "views/partials/", // same as default
-	layoutsDir: "views/layouts/" // same as default
+app.engine('hbs', exphbs({
+	defaultLayout: 'main',
+	extname: '.hbs',
+	helpers: require('./public/js/helpers.js').helpers, // same file that gets used on our client
+	partialsDir: 'views/partials/', // same as default
+	layoutsDir: 'views/layouts/' // same as default
 }));
-app.set("view engine", "hbs");
+app.set('view engine', 'hbs');
 
 // http logging
 app.use(morgan('combined', { "stream": logFileOnly.stream }));
