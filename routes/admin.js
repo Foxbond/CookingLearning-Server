@@ -12,7 +12,8 @@ router.all('*', function(req, res, next){
 		log.info('Denied access to "'+req.originalUrl+'" for "'+req.session.user+'" ');
 		return next(createError(403));
 	}
-	
+
+	res.locals.layout = 'admin';
 	res.locals.title = 'Admin';
 	
 	next();
