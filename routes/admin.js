@@ -24,16 +24,35 @@ router.get('/', function(req, res) {
 	res.render('admin/index', {title: 'Admin - Index'});
 });
 
-router.all('/createUser', function (req, res, next){
-	res.locals.title = 'Admin - CreateUser';
+router.all('/manageUsers', function (req, res, next){
+	res.locals.title = 'Admin - ManageUsers';
 	next();
 });
 
-router.get('/createUser', function(req, res) {
+router.get('/manageUsers', function (req, res, next) {
+
+	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
+		'FROM users ' +
+		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
+		'GROUP BY users.userId', function (err, data) {
+			if (err) {
+				log.error('DB Query error! ("' + err + '")');
+				return next(createError(500));
+			}
+			res.render('admin/manageUsers', {
+				title: 'Admin - ManageUsers',
+				users: data
+			});
+		});
+
+});//router.get('/manageUsers'
+
+router.get('/manageUsers/create', function(req, res) {
 	res.render('admin/createUser');
 });
 
-router.post('/createUser', function(req, res, next) {
+router.post('/manageUsers/create', function(req, res, next) {
 	
 	if (!req.body.userMail || !req.body.userName || !req.body.userPassword){
 		return res.render('admin/createUser', { 
@@ -110,26 +129,7 @@ router.post('/createUser', function(req, res, next) {
 			});//db.insert
 		});//db.count
 	});//bcrypt.hash
-});//router.post('/createUser'
-
-router.get('/listUsers', function(req, res, next) {
-	
-	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
-		'FROM users ' +
-		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
-		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
-		'GROUP BY users.userId', function (err, data) {
-		if (err){
-			log.error('DB Query error! ("'+err+'")');
-			return next(createError(500)); 
-		}
-		res.render('admin/listUsers', {
-			title: 'Admin - ListUsers',
-			users:data
-		});
-	});
-	
-});//router.get('/listUsers'
+});//router.post('/manageUsers/create'
 
 router.get('/test/throwRandomError', function (req, res) {
 

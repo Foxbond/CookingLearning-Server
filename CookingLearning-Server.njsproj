@@ -43,7 +43,7 @@
     <Content Include="public\stylesheets\style.css" />
     <Content Include="views\admin\createUser.hbs" />
     <Content Include="views\admin\index.hbs" />
-    <Content Include="views\admin\listUsers.hbs" />
+    <Content Include="views\admin\manageUsers.hbs" />
     <Content Include="views\error.hbs" />
     <Content Include="views\index.hbs" />
     <Content Include="views\layouts\admin.hbs">
