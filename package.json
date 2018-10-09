@@ -12,6 +12,7 @@
 	},
 	"private": true,
 	"dependencies": {
+		"async": "^2.6.1",
 		"bcrypt-nodejs": "0.0.3",
 		"client-sessions": "^0.8.0",
 		"cookie-parser": "~1.4.3",
