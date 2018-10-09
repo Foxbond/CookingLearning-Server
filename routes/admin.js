@@ -129,10 +129,19 @@ router.get('/listUsers', function(req, res, next) {
 	
 });//router.get('/listUsers'
 
-router.get('/throwRandomError', function (req, res) {
+router.get('/test/throwRandomError', function (req, res) {
 
 	throw new Error('admin/throwRandomError!');
 
-});//router.get('/throwRandomError'
+});//router.get('/test/throwRandomError'
+
+router.get('/test/log', function (req, res) {
+
+	log.debug('admin/throwRandomError debug');
+	log.info('admin/throwRandomError info');
+	log.error('admin/throwRandomError error');
+	log.error('admin/throwRandomError errorAdditional', { obj: 'ert' });
+
+});//router.get('/test/log'
 
 module.exports = router;

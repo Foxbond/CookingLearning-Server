@@ -42,13 +42,17 @@ log = winston.createLogger({
 			level: 'debug',
 			handleExceptions: true,
 			format: winston.format.combine(
-				/* TODO: Create custom formatter to use it
 				winston.format.timestamp({
 					format: 'HH:mm:ss'
-				}), */
-				// TODO: Custon format of js errors (message, status, stack
+				}),
 				winston.format.colorize(),
-				winston.format.simple()
+				winston.format.printf((info) => {
+					const {
+						timestamp, level, message, ...args
+					} = info;
+
+					return `${timestamp} ${level}: ${message} ${Object.keys(args).length ? '\n'+JSON.stringify(args, null, 2) : ''}`;
+				})
 			)
 		})
 	],
