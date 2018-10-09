@@ -110,9 +110,13 @@ router.post('/createUser', function(req, res, next) {
 	});//bcrypt.hash
 });//router.post('/createUser'
 
-router.get('/listUsers', function(req, res) {
+router.get('/listUsers', function(req, res, next) {
 	
-	db.query('SELECT * from users', function (err, data) {
+	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
+		'FROM users ' +
+		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
+		'GROUP BY users.userId', function (err, data) {
 		if (err){
 			log.error('DB Query error! ("'+err+'")');
 			return next(createError(500)); 
