@@ -6,9 +6,19 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
 			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 			crossorigin="anonymous"></script>
-	<script type="text/javascript" src="js/admin.js"></script>
+	<script type="text/javascript" src="/js/admin.js"></script>
 </head>
 <body>
-	{{{body}}}
+	<div id="overlay"></div>
+	<div id="loadingBox"></div>
+	<div id="main">
+		<div id="header">
+			{{{generateNav originalUrl}}}
+		</div>
+		<hr>
+		<div id="content">
+			{{{body}}}
+		</div>
+	</div>
 </body>
 </html>

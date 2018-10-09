@@ -15,6 +15,7 @@ router.all('*', function(req, res, next){
 
 	res.locals.layout = 'admin';
 	res.locals.title = 'Admin';
+	res.locals.originalUrl = req.originalUrl;
 	
 	next();
 });//router.all('*'

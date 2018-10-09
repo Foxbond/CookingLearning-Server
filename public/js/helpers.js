@@ -28,7 +28,7 @@ var register = function(Handlebars) {
 				result += '<a href="'+path+'">'+pages[i]+'</a> -&gt; ';
 			}
 
-			return result + '<b>' + pages[pages.length - 1] + '</b></span>';
+			return result + '</span><h2>' + pages[pages.length - 1].charAt(0).toUpperCase() + pages[pages.length - 1].slice(1) + '</h2>';
 		}
 	};
 
