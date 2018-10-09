@@ -6,7 +6,7 @@ var exphbs = require('express-handlebars');
 //global
 path = require('path');
 createError = require('http-errors');
-validate = require('./public/js/validate.js');
+utils = require('./utils.js');
 
 /******************** Logging ********************/
 var morgan = require('morgan');
@@ -67,11 +67,6 @@ var mysql      = require('mysql');
 //global
 db = mysql.createPool(require('./config/mysql.cfg'));
 
-/******************** Routes ********************/
-var indexRouter = require('./routes/index');
-var adminRouter = require('./routes/admin');
-var userRouter = require('./routes/user');
-
 /******************** Express ********************/
 var app = express();
 
@@ -110,6 +105,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+/******************** Routes ********************/
+var indexRouter = require('./routes/index');
+var adminRouter = require('./routes/admin');
+var userRouter = require('./routes/user');
 
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);

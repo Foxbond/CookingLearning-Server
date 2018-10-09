@@ -21,14 +21,26 @@ router.post('/login', function(req, res, next) {
 	var userMail = req.body.userMail.trim();
 	var userPassword = req.body.userPassword;
 	
-	db.query('SELECT * FROM users WHERE userMail=?', [userMail], function(err, data){
+	db.query('SELECT users.userName, users.userPassword, group_concat(usergroups.groupId) as userGroups '+
+		'FROM users '+ 
+		'LEFT JOIN usergroups on usergroups.userId=users.userId '+
+		'WHERE users.userMail=?', [userMail], function(err, data){
 		if (err){
 			log.error('DB Query error! ("'+err+'")');
 			return next(createError(500)); 
 		}
 		
 		if(data.length == 0){
-			return res.render('login', {message:'Unknown mail'});// There is no need to hide this information behind something like "unknown user and/or password"
+			return res.render('user/login', {message:'Unknown mail'});// There is no need to hide this information behind something like "unknown user and/or password"
+		}
+		
+		//TODO: Create user group parser
+		if (utils.contains(data[0].userGroups.split(','), ['2'])){
+			return res.render('user/login', {message:'Your account is not activated!'});//TODO: Provide resend option
+		}
+		
+		if (utils.contains(data[0].userGroups.split(','), ['3', '4'])){
+			return res.render('user/login', {message:'Your account is disabled!'});//TODO: Resolve cause/provide explanation
 		}
 		
 		bcrypt.compare(req.body.userPassword, data[0].userPassword, function(err, compareResult) {
@@ -87,7 +99,7 @@ router.post('/register', function(req, res) {
 		});
 	}
 	
-	if (!validate.username(userName)){
+	if (!utils.validate.username(userName)){
 		return res.render('user/register', { 
 			message: 'Name must be alphanumeric!', 
 			_form: {
@@ -97,7 +109,7 @@ router.post('/register', function(req, res) {
 		});
 	}
 	
-	if (!validate.mail(userMail)){
+	if (!utils.validate.mail(userMail)){
 		return res.render('user/register', { 
 			message: 'Provide correct e-mail address!', 
 			_form: {
@@ -129,13 +141,22 @@ router.post('/register', function(req, res) {
 				});
 			}
 			
-			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err){
+			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err, data){
 				if (err){
 					log.error('DB Query error! ("'+err+'")');
 					return next(createError(500)); 
 				}
 				
-				res.render('user/registerComplete');
+				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function (err){
+					if (err){
+						log.error('DB Query error! ("'+err+'")');
+						return next(createError(500)); 
+					}
+					
+					res.render('user/registerComplete');
+				});
+				
+				
 			});
 		});
 	});

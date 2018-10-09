@@ -78,12 +78,19 @@ router.post('/createUser', function(req, res, next) {
 					return next(createError(500)); 
 				}
 				
-				res.render('admin/createUser', {
-					message: 'User "'+userName+'" added!'
+				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function (err){
+					if (err){
+						log.error('DB Query error! ("'+err+'")');
+						return next(createError(500)); 
+					}
+					
+					res.render('admin/createUser', {
+						message: 'User "'+userName+'" added!'
+					});
 				});
-			});
-		});
-	});
+			});//db.insert
+		});//db.count
+	});//bcrypt.hash
 });//router.post('/createUser'
 
 router.get('/listUsers', function(req, res) {
