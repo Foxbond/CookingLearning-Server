@@ -36,12 +36,20 @@
     <Content Include="tests\mysql_connection.js" />
     <Content Include="public\js\helpers.js" />
     <Content Include="public\stylesheets\style.css" />
+    <Content Include="views\admin\createUser.hbs" />
+    <Content Include="views\admin\index.hbs" />
+    <Content Include="views\admin\listUsers.hbs" />
+    <Content Include="views\error.hbs" />
+    <Content Include="views\index.hbs" />
+    <Content Include="views\layouts\main.hbs" />
+    <Content Include="views\user.hbs" />
+    <Content Include="views\user\login.hbs" />
+    <Content Include="views\user\register.hbs" />
+    <Content Include="views\user\registerComplete.hbs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin" />
     <Folder Include="config" />
-    <Folder Include="CookingLearning-Server" />
-    <Folder Include="CookingLearning-Server\CookingLearning-Server" />
     <Folder Include="logs" />
     <Folder Include="public" />
     <Folder Include="public\images" />
