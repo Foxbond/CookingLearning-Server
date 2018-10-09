@@ -107,10 +107,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 /******************** Routes ********************/
+var redirectRouter = require('./routes/redirect');
 var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var userRouter = require('./routes/user');
 
+app.use(redirectRouter);
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/user', userRouter);
