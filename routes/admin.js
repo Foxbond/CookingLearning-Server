@@ -129,4 +129,10 @@ router.get('/listUsers', function(req, res, next) {
 	
 });//router.get('/listUsers'
 
+router.get('/throwRandomError', function (req, res) {
+
+	throw new Error('admin/throwRandomError!');
+
+});//router.get('/throwRandomError'
+
 module.exports = router;
