@@ -39,7 +39,8 @@ router.post('/createUser', function(req, res, next) {
 				_form: {
 					mail: req.body.userMail,
 					name: req.body.userName,
-					password: req.body.userPassword
+					password: req.body.userPassword,
+					active: req.body.userActive=='on' ? 'checked' : ''
 				}
 			});
 	}
@@ -48,6 +49,7 @@ router.post('/createUser', function(req, res, next) {
 	var userMail = req.body.userMail.trim();
 	var userName = req.body.userName.trim();
 	var userPassword = req.body.userPassword.trim();
+	var userActive = (req.body.userActive == 'on');
 	
 	bcrypt.hash(userPassword, null, null, function(err, hash) {
 		if (err){
@@ -72,21 +74,36 @@ router.post('/createUser', function(req, res, next) {
 				});
 			}
 			
-			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err){
+			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err, data){
 				if (err){
 					log.error('DB Query error! ("'+err+'")');
 					return next(createError(500)); 
 				}
 				
-				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function (err){
+				db.query('INSERT INTO usergroups VALUES (?, 1)', [data.insertId], function (err){
 					if (err){
 						log.error('DB Query error! ("'+err+'")');
 						return next(createError(500)); 
 					}
+
+					if (!userActive) {
+						db.query('INSERT INTO usergroups VALUES (?, 2)', [data.insertId], function (err) {
+							if (err) {
+								log.error('DB Query error! ("' + err + '")');
+								return next(createError(500));
+							}
+
+							res.render('admin/createUser', {
+								message: 'User "' + userName + '" added!'
+							});
+						});
+					} else {
+						res.render('admin/createUser', {
+							message: 'User "' + userName + '" added!'
+						});
+					}
+
 					
-					res.render('admin/createUser', {
-						message: 'User "'+userName+'" added!'
-					});
 				});
 			});//db.insert
 		});//db.count
@@ -95,7 +112,7 @@ router.post('/createUser', function(req, res, next) {
 
 router.get('/listUsers', function(req, res) {
 	
-	db.query('SELECT * from users', function (err, data){
+	db.query('SELECT * from users', function (err, data) {
 		if (err){
 			log.error('DB Query error! ("'+err+'")');
 			return next(createError(500)); 
