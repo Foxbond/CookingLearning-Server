@@ -2,7 +2,7 @@
 	You are trying to remove user:<br />
 	<pre>{{userData}}</pre><br />
 	<form method="post">
-		<input type="hidden" value="{{userId}}" />
-		<input type="submit" value="Proceed" />
-	</form>
+		<input type="hidden" value="{{userId}}" name="userId" />
+		<input type="submit" value="Proceed" />&nbsp;<a href="/admin/manageUsers" class="button">Abort</a>
+	</form> 
 </p>

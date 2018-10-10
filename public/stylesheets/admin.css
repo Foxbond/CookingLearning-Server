@@ -21,6 +21,18 @@
 	padding:0px;
 }
 
+button {
+	padding: 2px 6px 3px;
+}
+
+input[type="submit"] {
+	padding: 2px 6px 3px;
+}
+
+input[readonly] {
+	color:gray;
+}
+
 body {
 	font-size: 14px;
 	font-family: Verdana, Arial;
@@ -95,4 +107,23 @@ a {
 a:hover {
 	cursor:pointer;
 	text-decoration:underline;
+}
+
+a.button {
+	font-family: Verdana;
+	font: 400 13.3333px Arial;
+	display: inline-block;
+	-webkit-appearance: push-button;
+    user-select: none;
+	border-width: 2px;
+    border-style: outset;
+    border-color: buttonface;
+    border-image: initial;
+	align-items: flex-start;
+    text-align: center;
+    cursor: default;
+    color: buttontext;
+    background-color: buttonface;
+    box-sizing: border-box;
+    padding: 2px 6px 3px;
 }

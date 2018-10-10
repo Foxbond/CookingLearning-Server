@@ -135,11 +135,55 @@ router.post('/manageUsers/create', function(req, res, next) {
 });//router.post('/manageUsers/create'
 
 router.get('/manageUsers/modify/:userId', function (req, res) {
-	
+	var userId = parseInt(req.params.userId);
+
+	if (userId <= 0) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	db.query('SELECT users.userId, users.userName, users.userMail, users.userPassword, group_concat(groups.groupName) as userGroups ' +
+	'FROM users ' +
+	'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+	'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
+	'WHERE users.userId=? ' +
+	'GROUP BY users.userId', [userId], function (err, data) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		if (data.length == 0) {
+			return res.redirect('/admin/manageUsers');
+		}
+
+		res.render('admin/modifyUser', {
+			userData: data[0]
+		});
+	});
 });//router.get('/manageUsers/modify/:userId'
 
-router.get('/manageUsers/remove/:userId', function (req, res) {
+router.post('/manageUsers/modify/:userId', function (req, res) {
+	var userId = parseInt(req.params.userId);
 
+	if (userId <= 0) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	if (userId !== parseInt(req.body.userId)) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	db.query('UPDATE users SET userName=?, userMail=? WHERE userId=?', [req.body.userName, req.body.userMail, userId], function (err) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		return res.redirect('/admin/manageUsers');
+	});
+});//router.post('/manageUsers/modify/:userId'
+
+router.get('/manageUsers/remove/:userId', function (req, res) {
 	var userId = parseInt(req.params.userId);
 
 	if (userId <= 0) {
@@ -147,12 +191,22 @@ router.get('/manageUsers/remove/:userId', function (req, res) {
 	}
 
 	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
-		'FROM users WHERE users.userId=? ' +
-		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
-		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
-		'GROUP BY users.userId', [userId], function (err, data) {
+	'FROM users ' +
+	'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+	'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
+	'WHERE users.userId=? ' +
+	'GROUP BY users.userId', [userId], function (err, data) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		if (data.length == 0) {
+			return res.redirect('/admin/manageUsers');
+		}
+
 		res.render('admin/removeUser', {
-			userData: JSON.stringify(data),
+			userData: JSON.stringify(data[0], null, 2),
 			userId:userId
 		});
 	});
@@ -160,8 +214,25 @@ router.get('/manageUsers/remove/:userId', function (req, res) {
 });//router.get('/manageUsers/remove/:userId'
 
 router.post('/manageUsers/remove/:userId', function (req, res) {
+	var userId = parseInt(req.params.userId);
 
-});//router.get('/manageUsers/remove/:userId'
+	if (userId <= 0) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	if (userId !== parseInt(req.body.userId)) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	db.query('DELETE FROM users WHERE userId=?', [userId], function (err) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		return res.redirect('/admin/manageUsers');
+	});
+});//router.post('/manageUsers/remove/:userId'
 
 router.get('/test/throwRandomError', function (req, res) {
 
