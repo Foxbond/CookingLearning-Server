@@ -1,7 +1,10 @@
 var bcrypt = require('bcrypt-nodejs');
-
 var express = require('express');
-var router = express.Router();
+
+var router = express.Router({
+	caseSensitive: app.get('case sensitive routing'),
+	strict: app.get('strict routing')
+});
 
 router.get('/login', function(req, res) {
 	if (req.session && req.session.user){
@@ -58,6 +61,10 @@ router.post('/login', function(req, res, next) {
 		});
 	});
 });//router.post('/login'
+
+router.all('/register/', function (req, res) {
+	return res.redirect('/user/register');
+});//router.get('/register/'
 
 router.get('/register', function(req, res) {
 	

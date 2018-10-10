@@ -2,6 +2,7 @@ var express = require('express');
 var cookieParser = require('cookie-parser');
 var sessions = require('client-sessions');
 var exphbs = require('express-handlebars');
+var expressSlash = require('express-slash');;
 
 //global
 path = require('path');
@@ -72,7 +73,12 @@ var mysql      = require('mysql');
 db = mysql.createPool(require('./config/mysql.cfg'));
 
 /******************** Express ********************/
-var app = express();
+app = express();
+
+//I'm a masochist
+app.enable('strict routing');
+app.enable('case sensitive routing');
+//TODO: There is bug with strict routing on root path in nested routes, /admin and /admin/ is both valid, SEE: https://github.com/expressjs/express/issues/2281
 
 //Let's meet
 app.disable('x-powered-by');
@@ -120,6 +126,9 @@ app.use(redirectRouter);
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/user', userRouter);
+
+//handle trailing-slash routing errors
+app.use(expressSlash());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
