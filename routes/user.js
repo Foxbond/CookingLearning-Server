@@ -6,7 +6,7 @@ var router = express.Router({
 	strict: app.get('strict routing')
 });
 
-router.get('/login', function(req, res) {
+router.get('/login', function route_login(req, res) {
 	if (req.session && req.session.user){
 		return res.redirect('/user');
 	}
@@ -14,7 +14,7 @@ router.get('/login', function(req, res) {
 	return res.render('user/login');
 });//router.get('/login'
 
-router.post('/login', function(req, res, next) {
+router.post('/login', function route_login(req, res, next) {
 	
 	if (!req.body.userMail || !req.body.userPassword){
 		return res.render('user/login', {message:'Fill all fields'});
@@ -27,7 +27,7 @@ router.post('/login', function(req, res, next) {
 	db.query('SELECT users.userName, users.userPassword, group_concat(usergroups.groupId) as userGroups '+
 		'FROM users '+ 
 		'LEFT JOIN usergroups on usergroups.userId=users.userId '+
-		'WHERE users.userMail=?', [userMail], function(err, data){
+		'WHERE users.userMail=?', [userMail], function db_getUserData(err, data){
 		if (err){
 			log.error('DB Query error! ("'+err+'")');
 			return next(createError(500)); 
@@ -62,16 +62,16 @@ router.post('/login', function(req, res, next) {
 	});
 });//router.post('/login'
 
-router.all('/register/', function (req, res) {
+router.all('/register/', function route_register(req, res) {
 	return res.redirect('/user/register');
 });//router.get('/register/'
 
-router.get('/register', function(req, res) {
+router.get('/register', function route_register(req, res) {
 	
 	return res.render('user/register');
 });//router.get('/register'
 
-router.post('/register', function(req, res) {
+router.post('/register', function route_register(req, res) {
 	if (!req.body.userMail || !req.body.userName || !req.body.userPassword || !req.body.userPassword2){
 		return res.render('user/register', { 
 			message: 'Fill all fields!', 
@@ -126,13 +126,13 @@ router.post('/register', function(req, res) {
 		});
 	}
 	
-	bcrypt.hash(userPassword, null, null, function(err, hash) {
+	bcrypt.hash(userPassword, null, null, function hashPassword(err, hash) {
 		if (err){
 			log.error('Unable to compute hash! ("'+err+'")');
 			return next(createError(500)); 
 		}
 		
-		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function(err, data){
+		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data){
 			if (err){
 				log.error('DB Query error! ("'+err+'")');
 				return next(createError(500)); 
@@ -148,13 +148,13 @@ router.post('/register', function(req, res) {
 				});
 			}
 			
-			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err, data){
+			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data){
 				if (err){
 					log.error('DB Query error! ("'+err+'")');
 					return next(createError(500)); 
 				}
 				
-				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function (err){
+				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function db_insertGroups(err){
 					if (err){
 						log.error('DB Query error! ("'+err+'")');
 						return next(createError(500)); 
@@ -170,7 +170,7 @@ router.post('/register', function(req, res) {
 	
 });//router.post('/register'
 
-router.all('*', function(req, res, next){
+router.all('*', function route_star(req, res, next){
 	if (!req.session || !req.session.user){
 		return res.redirect('/user/login');
 	}
@@ -180,12 +180,12 @@ router.all('*', function(req, res, next){
 	next();
 });//router.all('*'
 
-router.get('/', function(req, res) {
+router.get('/', function route_root(req, res) {
 	
 	return res.render('user', {username:req.session.user});
 });//router.get('/'
 
-router.get('/logout', function(req, res) {
+router.get('/logout', function route_logout(req, res) {
 	
 	req.session.reset();
 	

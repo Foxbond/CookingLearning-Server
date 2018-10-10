@@ -5,11 +5,11 @@ var router = express.Router({
 	strict: app.get('strict routing')
 });
 
-router.get('/login', function (req, res) {
+router.get('/login', function route_login(req, res) {
 	res.redirect('/user/login');
 });
 
-router.get('/logout', function (req, res) {
+router.get('/logout', function route_logout(req, res) {
 	res.redirect('/user/logout');
 });
 

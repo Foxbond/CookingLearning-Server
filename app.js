@@ -82,7 +82,7 @@ app.enable('case sensitive routing');
 
 //Let's meet
 app.disable('x-powered-by');
-app.use(function(req, res, next){
+app.use(function app_setServerHeaders(req, res, next){
 	res.setHeader('Server', 'Hidden');
 	res.setHeader('X-Powered-By', 'Hidden');
 	/* res.setHeader('Access-Control-Allow-Origin', ''); */
@@ -131,12 +131,12 @@ app.use('/user', userRouter);
 app.use(expressSlash());
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function app_catch404(req, res, next) {
 	next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function app_errorHandler(err, req, res, next) {
 	// set locals, only providing error in development
 	res.locals.message = err.message;
 	res.locals.error = req.app.get('env') === 'development' ? err : {};

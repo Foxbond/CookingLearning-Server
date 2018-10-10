@@ -9,13 +9,13 @@
 
 var admin = {};
 
-admin.init = function init() {
+admin.init = function admin_init() {
 	//admin.showLoading();
 
 	//admin.hideLoading();
 };
 
-admin.showOverlay = function (inst) {
+admin.showOverlay = function admin_showOverlay(inst) {
 	if (inst) {
 		$('#overlay').show(0);
 		return;
@@ -23,7 +23,7 @@ admin.showOverlay = function (inst) {
 	$('#overlay').fadeIn('fast');
 };
 
-admin.hideOverlay = function (inst) {
+admin.hideOverlay = function admin_hideOverlay(inst) {
 	if (inst) {
 		$('#overlay').hide(0);
 		return;
@@ -31,12 +31,12 @@ admin.hideOverlay = function (inst) {
 	$('#overlay').fadeOut('fast');
 };
 
-admin.showLoading = function () {
+admin.showLoading = function admin_showLoading() {
 	admin.showOverlay();
 	$('#loadingBox').center().fadeIn('fast');
 };
 
-admin.hideLoading = function () {
+admin.hideLoading = function admin_hideLoading() {
 	admin.hideOverlay();
 	$('#loadingBox').fadeOut('fast');
 };
@@ -45,6 +45,6 @@ admin.hideLoading = function () {
 
 
 /***********************/
-$(document).ready(function () {
+$(document).ready(function initJS() {
 	admin.init();
 });

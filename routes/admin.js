@@ -6,7 +6,7 @@ var router = express.Router({
 	strict: app.get('strict routing')
 });
 
-router.all('*', function(req, res, next){
+router.all('*', function route_star(req, res, next){
 	if (!req.session || !req.session.user){
 		return res.redirect('/user/login');
 	}
@@ -23,22 +23,22 @@ router.all('*', function(req, res, next){
 	next();
 });//router.all('*'
 
-router.get('/', function(req, res) {
+router.get('/', function route_root(req, res) {
 	res.render('admin/index', {title: 'Admin - Index'});
 });
 
-router.all('/manageUsers', function (req, res, next){
+router.all('/manageUsers', function route_manageUsers(req, res, next){
 	res.locals.title = 'Admin - ManageUsers';
 	next();
 });
 
-router.get('/manageUsers', function (req, res, next) {
+router.get('/manageUsers', function route_manageUsers(req, res, next) {
 
 	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
 		'FROM users ' +
 		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
 		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
-		'GROUP BY users.userId', function (err, data) {
+		'GROUP BY users.userId', function db_getUsersData(err, data) {
 			if (err) {
 				log.error('DB Query error! ("' + err + '")');
 				return next(createError(500));
@@ -51,11 +51,11 @@ router.get('/manageUsers', function (req, res, next) {
 
 });//router.get('/manageUsers'
 
-router.get('/manageUsers/create', function(req, res) {
+router.get('/manageUsers/create', function route_manageUsers_create(req, res) {
 	res.render('admin/createUser');
 });
 
-router.post('/manageUsers/create', function(req, res, next) {
+router.post('/manageUsers/create', function route_manageUsers_create(req, res, next) {
 	
 	if (!req.body.userMail || !req.body.userName || !req.body.userPassword){
 		return res.render('admin/createUser', { 
@@ -75,13 +75,13 @@ router.post('/manageUsers/create', function(req, res, next) {
 	var userPassword = req.body.userPassword.trim();
 	var userActive = (req.body.userActive == 'on');
 	
-	bcrypt.hash(userPassword, null, null, function(err, hash) {
+	bcrypt.hash(userPassword, null, null, function hashPassword(err, hash) {
 		if (err){
 			log.error('Unable to compute hash! ("'+err+'")');
 			return next(createError(500)); 
 		}
 		
-		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function(err, data){
+		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data){
 			if (err){
 				log.error('DB Query error! ("'+err+'")');
 				return next(createError(500)); 
@@ -98,20 +98,20 @@ router.post('/manageUsers/create', function(req, res, next) {
 				});
 			}
 			
-			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function(err, data){
+			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data){
 				if (err){
 					log.error('DB Query error! ("'+err+'")');
 					return next(createError(500)); 
 				}
 				
-				db.query('INSERT INTO usergroups VALUES (?, 1)', [data.insertId], function (err){
+				db.query('INSERT INTO usergroups VALUES (?, 1)', [data.insertId], function db_setGroup(err){
 					if (err){
 						log.error('DB Query error! ("'+err+'")');
 						return next(createError(500)); 
 					}
 
 					if (!userActive) {
-						db.query('INSERT INTO usergroups VALUES (?, 2)', [data.insertId], function (err) {
+						db.query('INSERT INTO usergroups VALUES (?, 2)', [data.insertId], function db_setGroup(err) {
 							if (err) {
 								log.error('DB Query error! ("' + err + '")');
 								return next(createError(500));
@@ -134,19 +134,19 @@ router.post('/manageUsers/create', function(req, res, next) {
 	});//bcrypt.hash
 });//router.post('/manageUsers/create'
 
-router.get('/stats', function (req, res) {
+router.get('/stats', function route_stats(req, res) {
 	//TODO: Display data cached on last run
 	res.render('admin/statsIntro');
 });//router.get('/stats'
 
-router.post('/stats', function (req, res) {
+router.post('/stats', function route_stats(req, res) {
 	//TODO: Fetch data from different sources in parallel (use async lib)
 
 	db.query('SELECT table_schema as dbName, ' +
 		'sum(data_length + index_length) / 1024 / 1024 as dbSize, ' +
 		'sum(data_free) / 1024 / 1024 as dbFreeSpace ' +
 		'FROM information_schema.TABLES ' +
-		'GROUP BY table_schema; ', function (err, data) {
+		'GROUP BY table_schema; ', function db_getDbStats(err, data) {
 			if (err) {
 				log.error('DB Query error! ("' + err + '")');
 				return next(createError(500));
@@ -158,13 +158,13 @@ router.post('/stats', function (req, res) {
 		});
 });//router.get('/stats'
 
-router.get('/test/throwRandomError', function (req, res) {
+router.get('/test/throwRandomError', function route_test_throwRandomError(req, res) {
 
 	throw new Error('admin/throwRandomError!');
 
 });//router.get('/test/throwRandomError'
 
-router.get('/test/log', function (req, res) {
+router.get('/test/log', function route_test_log(req, res) {
 
 	log.debug('admin/throwRandomError debug');
 	log.info('admin/throwRandomError info');

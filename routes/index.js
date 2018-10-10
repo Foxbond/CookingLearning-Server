@@ -6,7 +6,7 @@ var router = express.Router({
 });
 
 /* GET home page. */
-router.get('/', function(req, res) {
+router.get('/', function route_root(req, res) {
 	res.render('index', { title: 'Express' });
 });
 
