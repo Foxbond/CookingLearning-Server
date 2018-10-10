@@ -131,6 +131,35 @@ router.post('/manageUsers/create', function(req, res, next) {
 	});//bcrypt.hash
 });//router.post('/manageUsers/create'
 
+router.get('/manageUsers/modify/:userId', function (req, res) {
+	
+});//router.get('/manageUsers/modify/:userId'
+
+router.get('/manageUsers/remove/:userId', function (req, res) {
+
+	var userId = parseInt(req.params.userId);
+
+	if (userId <= 0) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
+		'FROM users WHERE users.userId=? ' +
+		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
+		'GROUP BY users.userId', [userId], function (err, data) {
+		res.render('admin/removeUser', {
+			userData: JSON.stringify(data),
+			userId:userId
+		});
+	});
+	
+});//router.get('/manageUsers/remove/:userId'
+
+router.post('/manageUsers/remove/:userId', function (req, res) {
+
+});//router.get('/manageUsers/remove/:userId'
+
 router.get('/test/throwRandomError', function (req, res) {
 
 	throw new Error('admin/throwRandomError!');
