@@ -29,6 +29,12 @@ var register = function(Handlebars) {
 			}
 
 			return result + '</span><h2>' + pages[pages.length - 1].charAt(0).toUpperCase() + pages[pages.length - 1].slice(1) + '</h2>';
+		},
+		fixed: function (num, prec) {
+			if (typeof num === 'string') {
+				return parseFloat(num).toFixed(prec);
+			}
+			return num.toFixed(prec);
 		}
 	};
 

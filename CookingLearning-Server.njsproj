@@ -52,6 +52,12 @@
     <Content Include="views\admin\removeUser.hbs">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="views\admin\stats.hbs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\admin\statsIntro.hbs">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="views\error.hbs" />
     <Content Include="views\index.hbs" />
     <Content Include="views\layouts\admin.hbs">
@@ -86,6 +92,7 @@
     <Compile Include="routes\redirect.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="tests\helper_fixed.js" />
     <Compile Include="tests\helper_generateNav.js">
       <SubType>Code</SubType>
     </Compile>
