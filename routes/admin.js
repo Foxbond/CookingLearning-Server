@@ -1,7 +1,10 @@
 var express = require('express');
 var bcrypt = require('bcrypt-nodejs');
 
-var router = express.Router();
+var router = express.Router({
+	caseSensitive: app.get('case sensitive routing'),
+	strict: app.get('strict routing')
+});
 
 router.all('*', function(req, res, next){
 	if (!req.session || !req.session.user){

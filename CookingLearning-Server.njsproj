@@ -44,6 +44,9 @@
     <Content Include="views\admin\createUser.hbs" />
     <Content Include="views\admin\index.hbs" />
     <Content Include="views\admin\manageUsers.hbs" />
+    <Content Include="views\admin\removeUser.hbs">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="views\error.hbs" />
     <Content Include="views\index.hbs" />
     <Content Include="views\layouts\admin.hbs">
