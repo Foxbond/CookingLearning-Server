@@ -21,19 +21,23 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Content Include=".gitignore" />
     <Content Include="bin\www" />
+    <Content Include="db.sql" />
+    <Content Include="install.bat" />
     <Content Include="package-lock.json" />
     <Content Include="package.json" />
+    <Content Include="public\images\loading.gif" />
+    <Content Include="public\images\loadingL.gif" />
     <Content Include="public\stylesheets\admin.css">
       <SubType>Code</SubType>
     </Content>
     <Content Include="README.md" />
     <Content Include="app.js" />
+    <Content Include="run_local_debug.bat" />
     <Content Include="utils.js" />
     <Content Include="config\mysql.cfg.js" />
     <Content Include="config\mysql.template.js" />
-    <Content Include="logs\.0d70f37e0f8dfbf3dcbaca79667dbbb13d685541-audit.json" />
-    <Content Include="logs\.86d5b351f410fb4c6b9374160e941982377f7a59-audit.json" />
     <Content Include="routes\admin.js" />
     <Content Include="routes\index.js" />
     <Content Include="routes\user.js" />
