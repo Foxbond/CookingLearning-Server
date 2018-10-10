@@ -60,7 +60,7 @@ sup {
 	position: absolute;
 	display: none;
 	background-color: white;
-	background-image: url("loadingL.gif");
+	background-image: url("/images/loadingL.gif");
 	background-repeat: no-repeat;
 	background-position: center center;
 	border-radius: 100px;
