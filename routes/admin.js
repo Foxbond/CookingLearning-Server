@@ -169,6 +169,14 @@ router.get('/test/throwRandomError', function route_test_throwRandomError(req, r
 
 });//router.get('/test/throwRandomError'
 
+router.get('/test/mysqlError', function route_test_mysqlError(req, res, next) {
+
+	db.query('slct', function genMysqlError(err, data) {
+		next(err);
+	});
+
+});//router.get('/test/mysqlerror'
+
 router.get('/test/log', function route_test_log(req, res) {
 
 	log.debug('admin/throwRandomError debug');

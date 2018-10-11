@@ -136,12 +136,12 @@ app.use(function app_catch404(req, res, next) {
 });
 
 // error handler
-app.use(function app_errorHandler(err, req, res, next) {
+app.use(function app_errorHandler(err, req, res) {
 	// set locals, only providing error in development
 	res.locals.message = err.message;
 	res.locals.error = req.app.get('env') === 'development' ? err : {};
 	
-	//log.error(err);// TODO: Custon format of js errors (message, status, stack
+	log.error(err.message, err);
 	
 	// render the error page
 	res.status(err.status || 500);
