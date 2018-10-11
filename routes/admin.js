@@ -1,5 +1,6 @@
 var express = require('express');
 var bcrypt = require('bcrypt-nodejs');
+var getFolderSize = require('get-folder-size');
 
 var router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
@@ -152,9 +153,13 @@ router.post('/stats', function route_stats(req, res) {
 				return next(createError(500));
 			}
 
-			res.render('admin/stats', {
-				db:data[0]
+			getFolderSize('logs', function fs_getLogsSize(err, logsSize) {
+				res.render('admin/stats', {
+					db: data[0],
+					logSize: logsSize / 1024 / 1024
+				});
 			});
+			
 		});
 });//router.get('/stats'
 
