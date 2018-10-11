@@ -136,7 +136,7 @@ app.use(function app_catch404(req, res, next) {
 });
 
 // error handler
-app.use(function app_errorHandler(err, req, res) {
+app.use(function app_errorHandler(err, req, res, next) {
 	// set locals, only providing error in development
 	res.locals.message = err.message;
 	res.locals.error = req.app.get('env') === 'development' ? err : {};
