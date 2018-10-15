@@ -3,7 +3,7 @@ var cookieParser = require('cookie-parser');
 var sessions = require('client-sessions');
 var exphbs = require('express-handlebars');
 var expressSlash = require('express-slash');;
-var misc = require('config/misc.cfg');
+var misc = require('./config/misc.cfg');
 
 //global
 path = require('path');
