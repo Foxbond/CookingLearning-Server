@@ -3,12 +3,12 @@ var cookieParser = require('cookie-parser');
 var sessions = require('client-sessions');
 var exphbs = require('express-handlebars');
 var expressSlash = require('express-slash');;
-var misc = require('./config/misc.cfg');
 
 //global
 path = require('path');
 createError = require('http-errors');
 utils = require('./utils.js');
+misc = require('./config/misc.cfg');
 
 /******************** Logging ********************/
 var morgan = require('morgan');
@@ -72,6 +72,19 @@ logFileOnly.stream = {
 var mysql      = require('mysql');
 //global
 db = mysql.createPool(require('./config/mysql.cfg'));
+
+/******************** MailQueue ********************/
+var MailQueue = require('MailQueue');
+mailQueue = new MailQueue({
+	db: db,
+	smtp: require('./config/smtp.cfg'),
+	logger: log,
+	tableName: misc.mailDBTable,
+	from: misc.mailServerAddr,
+	numRetries: misc.mailNumRetries,
+	batchLimit: misc.mailBatchLimit,
+	defaultPriority: misc.mailDefaultPriority
+});
 
 /******************** Express ********************/
 app = express();

@@ -1,0 +1,15 @@
+<h1>Activate account</h1>
+<p>{{message}}</p>
+{{#unless hideForm}}
+<p>
+	<form method="POST">
+		Token: <input name="token" type="text" size="18">
+		<input type="submit" value="Activate">
+	</form>
+</p>
+{{else}}
+<p>
+	<a href="/user/login">Login here</a>
+</p>
+{{/unless}}
+
