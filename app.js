@@ -8,6 +8,7 @@ var expressSlash = require('express-slash');;
 path = require('path');
 createError = require('http-errors');
 utils = require('./utils.js');
+misc = require('./config/misc.cfg');
 
 /******************** Logging ********************/
 var morgan = require('morgan');
@@ -72,6 +73,19 @@ var mysql      = require('mysql');
 //global
 db = mysql.createPool(require('./config/mysql.cfg'));
 
+/******************** MailQueue ********************/
+var MailQueue = require('MailQueue');
+mailQueue = new MailQueue({
+	db: db,
+	smtp: require('./config/smtp.cfg'),
+	logger: log,
+	tableName: misc.mailDBTable,
+	from: misc.mailServerAddr,
+	numRetries: misc.mailNumRetries,
+	batchLimit: misc.mailBatchLimit,
+	defaultPriority: misc.mailDefaultPriority
+});
+
 /******************** Express ********************/
 app = express();
 
@@ -83,8 +97,8 @@ app.enable('case sensitive routing');
 //Let's meet
 app.disable('x-powered-by');
 app.use(function app_setServerHeaders(req, res, next){
-	res.setHeader('Server', 'Hidden');
-	res.setHeader('X-Powered-By', 'Hidden');
+	res.setHeader('Server', misc.serverName);
+	res.setHeader('X-Powered-By', misc.serverName);
 	/* res.setHeader('Access-Control-Allow-Origin', ''); */
 	next();
 });
@@ -106,9 +120,9 @@ app.use(morgan('dev'));
 //sessions
 app.use(sessions({
 	cookieName: 'session',
-	secret: 'FOR DEBUG USE ONLY MUST BE CHANGED2', //TODO: Change session.cookie.secret
-	duration:   7 * 24 * 60 * 60 * 1000, //week
-	activeDuration: 28 * 60 * 60 * 1000 //1d+
+	secret: misc.cookieKey, //TODO: Change session.cookie.secret
+	duration:   misc.cookieDuration, 
+	activeDuration: misc.cookieActiveDuration 
 }));
 
 app.use(express.json());

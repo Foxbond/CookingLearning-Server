@@ -65,6 +65,7 @@
     </Content>
     <Content Include="views\layouts\main.hbs" />
     <Content Include="views\user.hbs" />
+    <Content Include="views\user\activateForm.hbs" />
     <Content Include="views\user\login.hbs" />
     <Content Include="views\user\register.hbs" />
     <Content Include="views\user\registerComplete.hbs" />
@@ -86,6 +87,12 @@
     <Folder Include="views\user" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="config\misc.template.js" />
+    <Compile Include="config\misc.cfg.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="config\smtp.cfg.js" />
+    <Compile Include="config\smtp.template.js" />
     <Compile Include="public\js\admin.js">
       <SubType>Code</SubType>
     </Compile>
@@ -94,6 +101,9 @@
     </Compile>
     <Compile Include="tests\helper_fixed.js" />
     <Compile Include="tests\helper_generateNav.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\mail.js">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

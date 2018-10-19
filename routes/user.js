@@ -15,7 +15,10 @@ router.get('/login', function route_login(req, res) {
 });//router.get('/login'
 
 router.post('/login', function route_login(req, res, next) {
-	
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
 	if (!req.body.userMail || !req.body.userPassword){
 		return res.render('user/login', {message:'Fill all fields'});
 	}
@@ -67,11 +70,18 @@ router.all('/register/', function route_register(req, res) {
 });//router.get('/register/'
 
 router.get('/register', function route_register(req, res) {
-	
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
 	return res.render('user/register');
 });//router.get('/register'
 
 router.post('/register', function route_register(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
 	if (!req.body.userMail || !req.body.userName || !req.body.userPassword || !req.body.userPassword2){
 		return res.render('user/register', { 
 			message: 'Fill all fields!', 
@@ -153,14 +163,18 @@ router.post('/register', function route_register(req, res) {
 					log.error('DB Query error! ("'+err+'")');
 					return next(createError(500)); 
 				}
-				
+
+				//TODO: Second query AND mail AND page rendering can be run in parallel
 				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function db_insertGroups(err){
 					if (err){
 						log.error('DB Query error! ("'+err+'")');
 						return next(createError(500)); 
 					}
 					
-					res.render('user/registerComplete');
+					createActivationSession(userMail, function (err) {
+						
+						res.render('user/registerComplete');
+					});
 				});
 				
 				
@@ -169,6 +183,82 @@ router.post('/register', function route_register(req, res) {
 	});
 	
 });//router.post('/register'
+
+router.get('/activate', function route_activate(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
+	res.render('user/activateForm');
+});//router.get('/activate'
+
+router.post('/activate', function route_activate(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
+	if (!req.body.token) {
+		return res.redirect('/user/activate');
+	}
+
+	var token = req.body.token.trim();
+	if (token.length != 16) {
+		return res.redirect('/activate');
+	}
+
+	res.redirect('/user/activate/' + token);
+});//router.post('/activate'
+
+router.get('/activate/:token', function route_activate(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
+	var token = req.params.token.trim();
+	if (token.length != 16) {
+		return res.render('user/activateForm', {
+			message: 'Invalid token'
+		});
+	}
+
+	db.query('SELECT userId, expiry FROM activationsessions WHERE token=?', [token], function (err, data) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		if (data.length != 1) {
+			return res.render('user/activateForm', {
+				message: 'Invalid token'
+			});
+		}
+
+		if (data[0].expiry + misc.activationTokenExpiry < (+new Date())) {
+			return res.render('user/activateForm', {
+				message: 'Token expired'
+			});
+		}
+
+		db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function (err) {
+			if (err) {
+				log.error('DB Query error! ("' + err + '")');
+				return next(createError(500));
+			}
+
+			db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function (err) {
+				if (err) {
+					log.error('DB Query error! ("' + err + '")');
+				}
+			});
+
+			return res.render('user/activateForm', {
+				message: 'Success!',
+				hideForm: true
+			});
+		});
+	});
+
+});//router.get('/activate/:token'
 
 router.all('*', function route_star(req, res, next){
 	if (!req.session || !req.session.user){
@@ -193,3 +283,33 @@ router.get('/logout', function route_logout(req, res) {
 });//router.get('/logout'
 
 module.exports = router;
+
+//Im not proud of this monster, refactor is required
+function createActivationSession(userMail, callback) {
+
+	var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
+
+	db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function (err) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return callback(err);
+		}
+
+		var mail = {
+			from: misc.mailServerAddr,
+			to: userMail,
+			subject: 'Activate your account',
+			text: 'Activation token: ' + token + ' \r\nGo to ' + misc.serverAddr + '/user/activate to activate your account.',
+			html: 'Activation token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/activate/' + token + '">Click here</a> to activate your account.'//TODO: Use handlebars tpls for mails
+		}
+
+		mailQueue.send([mail], function (err, mailIds) {
+			if (err) {
+				log.error(err);
+				return callback(err);
+			}
+
+			callback();
+		});
+	});
+}//createActivationSession
