@@ -171,7 +171,7 @@ router.post('/register', function route_register(req, res) {
 						return next(createError(500)); 
 					}
 					
-					createActivationSession(userMail, function (err) {
+					createActivationSession(userMail, function activationSessionCreated(err) {
 						
 						res.render('user/registerComplete');
 					});
@@ -221,7 +221,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 		});
 	}
 
-	db.query('SELECT userId, expiry FROM activationsessions WHERE token=?', [token], function (err, data) {
+	db.query('SELECT userId, expiry FROM activationsessions WHERE token=?', [token], function db_getActivationSession(err, data) {
 		if (err) {
 			log.error('DB Query error! ("' + err + '")');
 			return next(createError(500));
@@ -239,13 +239,13 @@ router.get('/activate/:token', function route_activate(req, res) {
 			});
 		}
 
-		db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function (err) {
+		db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function db_removeUserGroup(err) {
 			if (err) {
 				log.error('DB Query error! ("' + err + '")');
 				return next(createError(500));
 			}
 
-			db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function (err) {
+			db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function db_removeActivationSession(err) {
 				if (err) {
 					log.error('DB Query error! ("' + err + '")');
 				}
@@ -289,7 +289,7 @@ function createActivationSession(userMail, callback) {
 
 	var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
-	db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function (err) {
+	db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function db_addActivationSession(err) {
 		if (err) {
 			log.error('DB Query error! ("' + err + '")');
 			return callback(err);
@@ -303,7 +303,7 @@ function createActivationSession(userMail, callback) {
 			html: 'Activation token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/activate/' + token + '">Click here</a> to activate your account.'//TODO: Use handlebars tpls for mails
 		}
 
-		mailQueue.send([mail], function (err, mailIds) {
+		mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
 			if (err) {
 				log.error(err);
 				return callback(err);
