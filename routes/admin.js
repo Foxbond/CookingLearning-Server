@@ -1,7 +1,14 @@
+'use strict';
+
 var express = require('express');
 var bcrypt = require('bcrypt-nodejs');
 var getFolderSize = require('get-folder-size');
 var async = require('async');
+var app = require('../app');
+var createError = require('http-errors');
+
+var log = app.locals.log;
+var db = app.locals.db;
 
 var router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),

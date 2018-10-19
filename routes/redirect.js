@@ -1,4 +1,7 @@
-﻿var express = require('express');
+﻿'use strict';
+
+var express = require('express');
+var app = require('../app');
 
 var router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
