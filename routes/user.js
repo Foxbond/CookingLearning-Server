@@ -300,7 +300,7 @@ function createActivationSession(userMail, callback) {
 			to: userMail,
 			subject: 'Activate your account',
 			text: 'Activation token: ' + token + ' \r\nGo to ' + misc.serverAddr + '/user/activate to activate your account.',
-			html: 'Activation token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/activate/' + token + '/">Click here</a> to activate your account.'//TODO: Use handlebars tpls for mails
+			html: 'Activation token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/activate/' + token + '">Click here</a> to activate your account.'//TODO: Use handlebars tpls for mails
 		}
 
 		mailQueue.send([mail], function (err, mailIds) {
