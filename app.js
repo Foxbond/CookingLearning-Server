@@ -1,19 +1,19 @@
+'use strict';
+
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var sessions = require('client-sessions');
 var exphbs = require('express-handlebars');
-var expressSlash = require('express-slash');;
-
-//global
-path = require('path');
-createError = require('http-errors');
-utils = require('./utils.js');
-misc = require('./config/misc.cfg');
-
-/******************** Logging ********************/
+var expressSlash = require('express-slash');
+var MailQueue = require('MailQueue');
+var path = require('path');
+var createError = require('http-errors');
+var misc = require('./config/misc.cfg');
 var morgan = require('morgan');
 var winston = require('winston');
+var mysql = require('mysql');
 require('winston-daily-rotate-file');
+
 
 var winstonTransportFile = new winston.transports.DailyRotateFile({
 	level: 'info',
@@ -30,15 +30,8 @@ var winstonTransportFile = new winston.transports.DailyRotateFile({
 			)
 });
 
-//global
-logFileOnly = winston.createLogger({
-    transports: [winstonTransportFile],
-	exitOnError: false
-});
-
-//global
-log = winston.createLogger({
-    transports: [
+var log = winston.createLogger({
+	transports: [
 		winstonTransportFile,
 		new winston.transports.Console({
 			level: 'debug',
@@ -53,7 +46,7 @@ log = winston.createLogger({
 						timestamp, level, message, ...args
 					} = info;
 
-					return `${timestamp} ${level}: ${message} ${Object.keys(args).length ? '\n'+JSON.stringify(args, null, 2) : ''}`;
+					return `${timestamp} ${level}: ${message} ${Object.keys(args).length ? '\n' + JSON.stringify(args, null, 2) : ''}`;
 				})
 			)
 		})
@@ -61,21 +54,31 @@ log = winston.createLogger({
 	exitOnError: false
 });
 
-//global
+var logFileOnly = winston.createLogger({
+    transports: [winstonTransportFile],
+	exitOnError: false
+});
+
 logFileOnly.stream = {
-	write: function(message, encoding){
+	write: function (message, encoding) {
 		logFileOnly.info(message);
 	}
 };
 
-/******************** MySQL ********************/
-var mysql      = require('mysql');
-//global
-db = mysql.createPool(require('./config/mysql.cfg'));
+var db = mysql.createPool(require('./config/mysql.cfg'))
 
-/******************** MailQueue ********************/
-var MailQueue = require('MailQueue');
-mailQueue = new MailQueue({
+/******************** Express ********************/
+var app = express();
+
+//I'm a masochist
+app.enable('strict routing');
+app.enable('case sensitive routing');
+//TODO: There is bug with strict routing on root path in nested routes, /admin and /admin/ is both valid, SEE: https://github.com/expressjs/express/issues/2281
+
+app.locals.log = log;
+app.locals.logFileOnly = logFileOnly;
+app.locals.db = db;
+app.locals.mailQueue = new MailQueue({
 	db: db,
 	smtp: require('./config/smtp.cfg'),
 	logger: log,
@@ -85,14 +88,6 @@ mailQueue = new MailQueue({
 	batchLimit: misc.mailBatchLimit,
 	defaultPriority: misc.mailDefaultPriority
 });
-
-/******************** Express ********************/
-app = express();
-
-//I'm a masochist
-app.enable('strict routing');
-app.enable('case sensitive routing');
-//TODO: There is bug with strict routing on root path in nested routes, /admin and /admin/ is both valid, SEE: https://github.com/expressjs/express/issues/2281
 
 //Let's meet
 app.disable('x-powered-by');
@@ -130,6 +125,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+module.exports = app;
+
 /******************** Routes ********************/
 var redirectRouter = require('./routes/redirect');
 var indexRouter = require('./routes/index');
@@ -162,4 +159,3 @@ app.use(function app_errorHandler(err, req, res, next) {
 	res.render('error');
 });
 
-module.exports = app;

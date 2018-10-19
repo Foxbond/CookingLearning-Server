@@ -1,5 +1,13 @@
+'use strict';
+
 var bcrypt = require('bcrypt-nodejs');
 var express = require('express');
+var app = require('../app');
+var utils = require('../utils');
+var misc = require('../config/misc.cfg');
+
+var log = app.locals.log;
+var db = app.locals.db;
 
 var router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
@@ -170,18 +178,36 @@ router.post('/register', function route_register(req, res) {
 						log.error('DB Query error! ("'+err+'")');
 						return next(createError(500)); 
 					}
-					
-					createActivationSession(userMail, function activationSessionCreated(err) {
-						
-						res.render('user/registerComplete');
+
+					var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
+
+					db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function db_addActivationSession(err) {
+						if (err) {
+							log.error('DB Query error! ("' + err + '")');
+							return callback(err);
+						}
+
+						var mail = {
+							from: misc.mailServerAddr,
+							to: userMail,
+							subject: 'Activate your account',
+							text: 'Activation token: ' + token + ' \r\nGo to ' + misc.serverAddr + '/user/activate to activate your account.',
+							html: 'Activation token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/activate/' + token + '">Click here</a> to activate your account.'//TODO: Use handlebars tpls for mails
+						}
+
+						req.app.locals.mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
+							if (err) {
+								log.error(err);
+								return callback(err);
+							}
+
+							res.render('user/registerComplete');
+						});
 					});
 				});
-				
-				
 			});
 		});
 	});
-	
 });//router.post('/register'
 
 router.get('/activate', function route_activate(req, res) {
@@ -283,33 +309,3 @@ router.get('/logout', function route_logout(req, res) {
 });//router.get('/logout'
 
 module.exports = router;
-
-//Im not proud of this monster, refactor is required
-function createActivationSession(userMail, callback) {
-
-	var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
-
-	db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function db_addActivationSession(err) {
-		if (err) {
-			log.error('DB Query error! ("' + err + '")');
-			return callback(err);
-		}
-
-		var mail = {
-			from: misc.mailServerAddr,
-			to: userMail,
-			subject: 'Activate your account',
-			text: 'Activation token: ' + token + ' \r\nGo to ' + misc.serverAddr + '/user/activate to activate your account.',
-			html: 'Activation token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/activate/' + token + '">Click here</a> to activate your account.'//TODO: Use handlebars tpls for mails
-		}
-
-		mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
-			if (err) {
-				log.error(err);
-				return callback(err);
-			}
-
-			callback();
-		});
-	});
-}//createActivationSession
