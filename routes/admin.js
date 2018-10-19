@@ -1,6 +1,7 @@
 var express = require('express');
 var bcrypt = require('bcrypt-nodejs');
 var getFolderSize = require('get-folder-size');
+var async = require('async');
 
 var router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
@@ -135,11 +136,12 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 	});//bcrypt.hash
 });//router.post('/manageUsers/create'
 
-router.get('/manageUsers/modify/:userId', function (req, res) {
+router.get('/manageUsers/modify/:userId', function (req, res, next) {
 	var userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
+
 	db.query('SELECT users.userId, users.userName, users.userMail, users.userPassword, group_concat(groups.groupName) as userGroups ' +
 		'FROM users ' +
 		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
@@ -150,37 +152,47 @@ router.get('/manageUsers/modify/:userId', function (req, res) {
 				log.error('DB Query error! ("' + err + '")');
 				return next(createError(500));
 			}
+
 			if (data.length == 0) {
 				return res.redirect('/admin/manageUsers');
 			}
+
+			var groups = data[0].userGroups.split(',');
+
 			res.render('admin/modifyUser', {
-				userData: data[0]
+				userData: data[0],
+				userNotActivated: (groups.indexOf('NotActivated') != -1 || groups.indexOf('Suspended') != -1),
+				userNotSuspended: (groups.indexOf('Suspended') == -1)
 			});
 		});
 });//router.get('/manageUsers/modify/:userId'
 
-router.post('/manageUsers/modify/:userId', function (req, res) {
+router.post('/manageUsers/modify/:userId', function (req, res, next) {
 	var userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
+
 	if (userId !== parseInt(req.body.userId)) {
 		return res.redirect('/admin/manageUsers');
 	}
+
 	db.query('UPDATE users SET userName=?, userMail=? WHERE userId=?', [req.body.userName, req.body.userMail, userId], function (err) {
 		if (err) {
 			log.error('DB Query error! ("' + err + '")');
 			return next(createError(500));
 		}
+
 		return res.redirect('/admin/manageUsers');
 	});
 });//router.post('/manageUsers/modify/:userId'
 
-router.get('/manageUsers/remove/:userId', function (req, res) {
+router.get('/manageUsers/remove/:userId', function (req, res, next) {
 	var userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
+
 	db.query('SELECT users.userId, users.userName, users.userMail, group_concat(groups.groupName) as userGroups ' +
 		'FROM users ' +
 		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
@@ -191,9 +203,11 @@ router.get('/manageUsers/remove/:userId', function (req, res) {
 				log.error('DB Query error! ("' + err + '")');
 				return next(createError(500));
 			}
+
 			if (data.length == 0) {
 				return res.redirect('/admin/manageUsers');
 			}
+
 			res.render('admin/removeUser', {
 				userData: JSON.stringify(data[0], null, 2),
 				userId: userId
@@ -202,30 +216,119 @@ router.get('/manageUsers/remove/:userId', function (req, res) {
 
 });//router.get('/manageUsers/remove/:userId'
 
-router.post('/manageUsers/remove/:userId', function (req, res) {
+router.post('/manageUsers/remove/:userId', function (req, res, next) {
 	var userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
+
 	if (userId !== parseInt(req.body.userId)) {
 		return res.redirect('/admin/manageUsers');
 	}
+
 	db.query('DELETE FROM users WHERE userId=?', [userId], function (err) {
 		if (err) {
 			log.error('DB Query error! ("' + err + '")');
 			return next(createError(500));
 		}
+
 		return res.redirect('/admin/manageUsers');
 	});
 });//router.post('/manageUsers/remove/:userId'
 
+router.get('/manageUsers/activate/:userId', function route_activateUser(req, res, next) {
+	var userId = parseInt(req.params.userId);
+	if (userId <= 0) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	db.query('SELECT users.userId, users.userName, group_concat(groups.groupName) as userGroups ' +
+		'FROM users ' +
+		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
+		'WHERE users.userId=? ' +
+		'GROUP BY users.userId', [userId], function (err, data) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		if (data.length == 0) {
+			return res.redirect('/admin/manageUsers');
+		}
+
+		var groups = data[0].userGroups.split(',');
+
+		async.series([
+			function activateAccount(callback) {
+				if (groups.indexOf('NotActivated') == -1) {
+					callback();
+					return;
+				}
+
+				db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function (err) {
+					if (err) {
+						callback(err);
+						return;
+					}
+
+					db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function (err) {
+						if (err) {
+							callback(err);
+							return;
+						}
+
+						callback();
+					});
+				});
+			}, function removeSuspension(callback) {
+				if (groups.indexOf('Suspended') == -1) {
+					callback();
+				}
+
+				db.query('DELETE FROM usergroups WHERE userId=? AND groupId=4', [data[0].userId], function (err) {
+					if (err) {
+						callback(err);
+						return;
+					}
+
+					callback();
+				});
+		}], function userAccActivated(err) {
+			if (err) {
+				log.error(err.message, err);
+				return next(createError(500));
+			}
+
+			res.redirect('/admin/manageUsers/modify/' + data[0].userId);
+		});	
+	});
+});//router.get('/manageUsers/activate/:userId'
+
+router.get('/manageUsers/suspend/:userId', function (req, res, next) {
+	var userId = parseInt(req.params.userId);
+	if (userId <= 0) {
+		return res.redirect('/admin/manageUsers');
+	}
+
+	//TODO: Check if user is already suspended
+
+	db.query('INSERT INTO usergroups VALUES (?, 4)', [userId], function (err) {
+		if (err) {
+			log.error('DB Query error! ("' + err + '")');
+			return next(createError(500));
+		}
+
+		return res.redirect('/admin/manageUsers/modify/'+userId);
+	});
+});//router.get('/manageUsers/suspend/:userId'
 
 router.get('/stats', function route_stats(req, res) {
 	//TODO: Display data cached on last run
 	res.render('admin/statsIntro');
 });//router.get('/stats'
 
-router.post('/stats', function route_stats(req, res) {
+router.post('/stats', function route_stats(req, res, next) {
 	//TODO: Fetch data from different sources in parallel (use async lib)
 
 	db.query('SELECT table_schema as dbName, ' +

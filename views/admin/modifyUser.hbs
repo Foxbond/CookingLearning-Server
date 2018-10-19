@@ -5,6 +5,13 @@
 		<input type="text" value="{{userData.userMail}}" name="userMail" /><br />
 		<input type="text" value="{{userData.userPassword}}" name="userPassword" readonly /><br />
 		<input type="text" value="{{userData.userGroups}}" name="userGroups" readonly /><br /><br />
-		<input type="submit" value="Proceed" />&nbsp;<a href="/admin/manageUsers" class="button">Abort</a>
+		<input type="submit" value="Proceed" />
+		&nbsp;<a href="/admin/manageUsers" class="button">Abort</a>
+		{{#if userNotActivated}}
+		&nbsp;<a href="/admin/manageUsers/activate/{{userData.userId}}" class="button">Activate</a>
+		{{/if}}
+		{{#if userNotSuspended}}
+		&nbsp;<a href="/admin/manageUsers/suspend/{{userData.userId}}" class="button">Suspend</a>
+		{{/if}}
 	</form> 
 </p>
