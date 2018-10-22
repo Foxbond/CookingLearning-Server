@@ -132,11 +132,14 @@ var redirectRouter = require('./routes/redirect');
 var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var userRouter = require('./routes/user');
+var recipeRouter = require('./routes/recipe');
 
 app.use(redirectRouter);
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/user', userRouter);
+app.use('/recipe', recipeRouter);
+
 
 //handle trailing-slash routing errors
 app.use(expressSlash());

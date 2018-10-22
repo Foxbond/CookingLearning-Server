@@ -65,6 +65,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="views\layouts\main.hbs" />
+    <Content Include="views\recipe\browse.hbs">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="views\user.hbs" />
     <Content Include="views\user\activateForm.hbs" />
     <Content Include="views\user\login.hbs" />
@@ -84,6 +87,7 @@
     <Folder Include="views" />
     <Folder Include="views\admin" />
     <Folder Include="views\layouts" />
+    <Folder Include="views\recipe\" />
     <Folder Include="views\partials" />
     <Folder Include="views\user" />
   </ItemGroup>
@@ -97,6 +101,7 @@
     <Compile Include="public\js\admin.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="routes\recipe.js" />
     <Compile Include="routes\redirect.js">
       <SubType>Code</SubType>
     </Compile>
