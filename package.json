@@ -29,6 +29,7 @@
 	},
 	"description": "CookingLearning-Server",
 	"homepage": "https://github.com/Foxbond/CookingLearning-Server",
+	"license": "UNLICENSED",
 	"name": "CookingLearning-Server",
 	"private": true,
 	"repository": {

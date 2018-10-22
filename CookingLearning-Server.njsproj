@@ -25,6 +25,7 @@
     <Content Include="bin\www" />
     <Content Include="db.sql" />
     <Content Include="install.bat" />
+    <Content Include="LICENSE" />
     <Content Include="package-lock.json" />
     <Content Include="package.json" />
     <Content Include="public\images\loading.gif" />
