@@ -3,6 +3,9 @@
 var express = require('express');
 var app = require('../app');
 var createError = require('http-errors');
+var removeDiacritics = require('diacritics').remove;
+
+var db = app.locals.db;
 
 var router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
@@ -16,7 +19,7 @@ router.get('/', function route_root(req, res) {
 //TODO: rewrite it to more strict matching
 router.get('/show/*', function route_root(req, res) {
 	res.redirect('/recipe/' + req.params[0]);
-});
+});//router.get('/show/*
 
 router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 	var recipeId = parseInt(req.params.recipeId);
@@ -24,10 +27,18 @@ router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 		return next();
 	}
 
-	//TODO: Fetch name and redirect to /recipe/:recipeId/:recipeName
-	//res.status(301).location('/recipe/:recipeId/:recipeName');
-	res.send('/recipe/:recipeId');
-});
+	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
+		if (err) {
+			return next(err);
+		}
+
+		if (data.length != 1) {
+			return next();
+		}
+
+		res.status(301).location('/recipe/'+recipeId+'/'+data[0].recipeUrl);
+	});
+});//router.get('/:recipeId(\\d+)
 
 router.get('/:recipeId(\\d+)/:recipeName', function route_showFull(req, res, next) {
 	var recipeId = parseInt(req.params.recipeId);
@@ -57,7 +68,7 @@ router.get('/browse', function route_browse(req, res) {
 });//router.get('/browse
 
 router.get('/create', function route_create(req, res) {
-
+	
 	//TODO: Recipe creator
 
 	res.send('recipe/create');
