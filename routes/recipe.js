@@ -22,12 +22,12 @@ router.get('/browse', function route_browse(req, res) {
 
 router.get('/create', function route_create(req, res) {
 
-	//TODO: Recipe creator
+	//TODO: Recipe creator (create blank recipe and redirect to edit)
 
 	res.render('recipe/create');
 });//router.get('/create
 
-//TODO: rewrite it to more strict matching
+//Rewrite it to more strict matching?
 router.get('/show/*', function route_root(req, res) {
 	res.redirect('/recipe/' + req.params[0]);
 });//router.get('/show/*
@@ -117,13 +117,12 @@ router.get('/edit/:recipeId(\\d+)', function route_edit(req, res, next) {
 	});
 });//router.get('/edit/:recipeId(\\d+)
 
-// '/:recipeId(\\d+)*'
 router.get(/\/(edit\/){0,1}([0-9]+)/, function route_showError(req, res) {
 
 	//TODO: Error page when recipe does not exists
 
 	res.status(404);
 	res.render('recipe/error');
-});//router.get('/:recipeId(\\d+)*
+});//router.get(/\/(edit\/){0,1}([0-9]+)/
 
 module.exports = router;
