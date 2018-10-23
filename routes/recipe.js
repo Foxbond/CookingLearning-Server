@@ -27,7 +27,7 @@ router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 		return next();
 	}
 
-	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
+	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipeUrl(err, data) {
 		if (err) {
 			return next(err);
 		}
@@ -46,12 +46,13 @@ router.get('/:recipeId(\\d+)/:recipeName', function route_showFull(req, res, nex
 		return next();
 	}
 
-	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
+	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipeUrl(err, data) {
 		if (err) {
 			return next(err);
 		}
 
 		if (data.length != 1) {
+			//TODO: Detect and redirect if user provides correct recipeUrl but wrong recipeId
 			return next();
 		}
 
@@ -60,7 +61,21 @@ router.get('/:recipeId(\\d+)/:recipeName', function route_showFull(req, res, nex
 			return res.status(301).location('/recipe/' + recipeId + '/' + data[0].recipeUrl);
 		}
 
-		res.send('/recipe/:recipeId/:recipeName');
+		//Maybe better fetch all information at once (during previous query)? I guess it depends how often users hit incorrect url
+		db.query('SELECT * FROM recipe WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
+			if (err) {
+				return next(err);
+			}
+
+			//Is this check really needed?
+			if (data.length != 1) {
+				return next(createError(500));
+			}
+
+			//TODO: Display recipe
+
+			res.send('/recipe/:recipeId/:recipeName<br><pre>' + JSON.stringify(data[0], null, 2)+'</pre>');
+		});
 	});
 });//router.get('/:recipeId(\\d+)/:recipeName
 
