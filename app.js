@@ -132,11 +132,14 @@ var redirectRouter = require('./routes/redirect');
 var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var userRouter = require('./routes/user');
+var recipeRouter = require('./routes/recipe');
 
 app.use(redirectRouter);
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/user', userRouter);
+app.use('/recipe', recipeRouter);
+
 
 //handle trailing-slash routing errors
 app.use(expressSlash());
@@ -148,11 +151,21 @@ app.use(function app_catch404(req, res, next) {
 
 // error handler
 app.use(function app_errorHandler(err, req, res, next) {
-	// set locals, only providing error in development
-	res.locals.message = err.message;
-	res.locals.error = req.app.get('env') === 'development' ? err : {};
-	
 	log.error(err.message, err);
+
+	//TODO: Pretty error for end user depending on err.message
+
+	if (req.app.get('env') === 'development') {
+		res.locals.message = err.message;
+		res.locals.error = err;
+	} else {
+		if (err.message.indexOf(':') != -1) {
+			res.locals.message = err.message.split(':')[0];
+		} else {
+			res.locals.message = err.message;
+		}
+		res.locals.error = {};
+	}	
 	
 	// render the error page
 	res.status(err.status || 500);

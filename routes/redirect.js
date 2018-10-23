@@ -16,4 +16,8 @@ router.get('/logout', function route_logout(req, res) {
 	res.redirect('/user/logout');
 });
 
+router.get('/recipes', function route_logout(req, res) {
+	res.redirect('/recipe/browse');
+});
+
 module.exports = router;
