@@ -16,6 +16,17 @@ router.get('/', function route_root(req, res) {
 	res.redirect('/recipe/browse');
 });//router.get('/
 
+router.get('/browse', function route_browse(req, res) {
+	res.render('recipe/browse');
+});//router.get('/browse
+
+router.get('/create', function route_create(req, res) {
+
+	//TODO: Recipe creator
+
+	res.render('recipe/create');
+});//router.get('/create
+
 //TODO: rewrite it to more strict matching
 router.get('/show/*', function route_root(req, res) {
 	res.redirect('/recipe/' + req.params[0]);
@@ -40,7 +51,7 @@ router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 	});
 });//router.get('/:recipeId(\\d+)
 
-router.get('/:recipeId(\\d+)/:recipeName', function route_showFull(req, res, next) {
+router.get('/:recipeId(\\d+)/:recipeUrl', function route_showFull(req, res, next) {
 	var recipeId = parseInt(req.params.recipeId);
 	if (recipeId <= 0) {
 		return next();
@@ -56,7 +67,7 @@ router.get('/:recipeId(\\d+)/:recipeName', function route_showFull(req, res, nex
 			return next();
 		}
 
-		if (req.params.recipeName != data[0].recipeUrl) {
+		if (req.params.recipeUrl != data[0].recipeUrl) {
 			//Maybe it's better to redirect this way? res.status(404).send('<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/recipe/:recipeId/:recipeName"></head></html>');
 			return res.status(301).location('/recipe/' + recipeId + '/' + data[0].recipeUrl);
 		}
@@ -74,28 +85,45 @@ router.get('/:recipeId(\\d+)/:recipeName', function route_showFull(req, res, nex
 
 			//TODO: Display recipe
 
-			res.send('/recipe/:recipeId/:recipeName<br><pre>' + JSON.stringify(data[0], null, 2)+'</pre>');
+			res.render('recipe/show', {
+				recipeData: JSON.stringify(data[0], null, 2)
+			});
 		});
 	});
-});//router.get('/:recipeId(\\d+)/:recipeName
+});//router.get('/:recipeId(\\d+)/:recipeUrl
 
+router.get('/edit', function route_edit(req, res) {
+	res.redirect('/recipe/browse');
+});//router.get('/edit
 
-router.get('/:recipeId(\\d+)*', function route_showError(req, res) {
-	
+router.get('/edit/:recipeId(\\d+)', function route_edit(req, res, next) {
+	var recipeId = parseInt(req.params.recipeId);
+	if (recipeId <= 0) {
+		return next();
+	}
+
+	db.query('SELECT * FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
+		if (err) {
+			return next(err);
+		}
+
+		if (data.length != 1) {
+			return next();
+		}
+
+		//TODO: Recipe editor
+
+		res.render('recipe/edit');
+	});
+});//router.get('/edit/:recipeId(\\d+)
+
+// '/:recipeId(\\d+)*'
+router.get(/\/(edit\/){0,1}([0-9]+)/, function route_showError(req, res) {
+
+	//TODO: Error page when recipe does not exists
 
 	res.status(404);
-	res.send('/recipe/:recipeId error');
+	res.render('recipe/error');
 });//router.get('/:recipeId(\\d+)*
-
-router.get('/browse', function route_browse(req, res) {
-	res.render('recipe/browse');
-});//router.get('/browse
-
-router.get('/create', function route_create(req, res) {
-	
-	//TODO: Recipe creator
-
-	res.send('recipe/create');
-});//router.get('/create
 
 module.exports = router;

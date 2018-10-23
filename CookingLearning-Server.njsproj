@@ -65,6 +65,10 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="views\layouts\main.hbs" />
+    <Content Include="views\recipe\edit.hbs" />
+    <Content Include="views\recipe\create.hbs" />
+    <Content Include="views\recipe\show.hbs" />
+    <Content Include="views\recipe\error.hbs" />
     <Content Include="views\recipe\browse.hbs">
       <SubType>Code</SubType>
     </Content>
