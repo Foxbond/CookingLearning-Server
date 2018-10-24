@@ -2,7 +2,7 @@
 <p>{{message}}</p>
 {{#unless hideForm}}
 <p>
-	<form method="POST">
+	<form method="POST" action="/user/activate">
 		Token: <input name="token" type="text" size="18">
 		<input type="submit" value="Activate">
 	</form>

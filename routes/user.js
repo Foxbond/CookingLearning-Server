@@ -221,12 +221,7 @@ router.post('/activate', function route_activate(req, res) {
 		return res.redirect('/user/activate');
 	}
 
-	var token = req.body.token.trim();
-	if (token.length != 16) {
-		return res.redirect('/activate');
-	}
-
-	res.redirect('/user/activate/' + token);
+	res.redirect('/user/activate/' + req.body.token.trim());
 });//router.post('/activate'
 
 router.get('/activate/:token', function route_activate(req, res) {
