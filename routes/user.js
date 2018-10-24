@@ -39,9 +39,8 @@ router.post('/login', function route_login(req, res, next) {
 		'FROM users '+ 
 		'LEFT JOIN usergroups on usergroups.userId=users.userId '+
 		'WHERE users.userMail=?', [userMail], function db_getUserData(err, data){
-		if (err){
-			log.error('DB Query error! ("'+err+'")');
-			return next(createError(500)); 
+		if (err) {
+			return next(err);
 		}
 		
 		if(data.length == 0){
@@ -151,9 +150,8 @@ router.post('/register', function route_register(req, res) {
 		}
 		
 		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data){
-			if (err){
-				log.error('DB Query error! ("'+err+'")');
-				return next(createError(500)); 
+			if (err) {
+				return next(err);
 			}
 			
 			if (data[0].c != 0){
@@ -167,24 +165,21 @@ router.post('/register', function route_register(req, res) {
 			}
 			
 			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data){
-				if (err){
-					log.error('DB Query error! ("'+err+'")');
-					return next(createError(500)); 
+				if (err) {
+					return next(err);
 				}
 
 				//TODO: Second query AND mail AND page rendering can be run in parallel
 				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function db_insertGroups(err){
-					if (err){
-						log.error('DB Query error! ("'+err+'")');
-						return next(createError(500)); 
+					if (err) {
+						return next(err);
 					}
 
 					var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
 					db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function db_addActivationSession(err) {
 						if (err) {
-							log.error('DB Query error! ("' + err + '")');
-							return callback(err);
+							return next(err);
 						}
 
 						var mail = {
@@ -197,8 +192,7 @@ router.post('/register', function route_register(req, res) {
 
 						req.app.locals.mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
 							if (err) {
-								log.error(err);
-								return callback(err);
+								return next(err);
 							}
 
 							res.render('user/registerComplete');
@@ -249,8 +243,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 
 	db.query('SELECT userId, expiry FROM activationsessions WHERE token=?', [token], function db_getActivationSession(err, data) {
 		if (err) {
-			log.error('DB Query error! ("' + err + '")');
-			return next(createError(500));
+			return next(err);
 		}
 
 		if (data.length != 1) {
@@ -267,13 +260,12 @@ router.get('/activate/:token', function route_activate(req, res) {
 
 		db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function db_removeUserGroup(err) {
 			if (err) {
-				log.error('DB Query error! ("' + err + '")');
-				return next(createError(500));
+				return next(err);
 			}
 
 			db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function db_removeActivationSession(err) {
 				if (err) {
-					log.error('DB Query error! ("' + err + '")');
+					log.error('DB Query error! ("' + err.message + '")', err);
 				}
 			});
 

@@ -115,7 +115,7 @@ app.use(morgan('dev'));
 //sessions
 app.use(sessions({
 	cookieName: 'session',
-	secret: misc.cookieKey, //TODO: Change session.cookie.secret
+	secret: misc.cookieKey,
 	duration:   misc.cookieDuration, 
 	activeDuration: misc.cookieActiveDuration 
 }));
@@ -156,13 +156,19 @@ app.use(function app_errorHandler(err, req, res, next) {
 	//TODO: Pretty error for end user depending on err.message
 
 	if (req.app.get('env') === 'development') {
-		res.locals.message = err.message;
+		if (err.message.indexOf(':') != -1) {
+			res.locals.errorType = err.message.split(':')[0];
+			res.locals.errorMessage = err.message.split(':')[1];
+		} else {
+			res.locals.errorMessage = err.message;
+		}
 		res.locals.error = err;
 	} else {
 		if (err.message.indexOf(':') != -1) {
-			res.locals.message = err.message.split(':')[0];
+			res.locals.errorType = err.message.split(':')[0];
+			res.locals.errorMessage = '';
 		} else {
-			res.locals.message = err.message;
+			res.locals.errorMessage = err.message;
 		}
 		res.locals.error = {};
 	}	
