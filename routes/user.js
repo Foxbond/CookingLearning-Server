@@ -236,7 +236,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 		});
 	}
 
-	db.query('SELECT userId, tokenExpiry FROM usertokens WHERE tokenValue=? AND tokenType=1', [token], function db_getActivationSession(err, data) {
+	db.query('SELECT userId, tokenCreated FROM usertokens WHERE tokenValue=? AND tokenType=1', [token], function db_getActivationSession(err, data) {
 		if (err) {
 			return next(err);
 		}
@@ -247,7 +247,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 			});
 		}
 
-		if (data[0].expiry + misc.activationTokenExpiry < (+new Date())) {
+		if (data[0].tokenCreated + misc.activationTokenExpiry < (+new Date())) {
 			return res.render('user/activateForm', {
 				message: 'Token expired'
 			});
