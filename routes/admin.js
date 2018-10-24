@@ -270,7 +270,7 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 						return;
 					}
 
-					db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function db_removeActivationSession(err) {
+					db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationSession(err) {
 						if (err) {
 							callback(err);
 							return;

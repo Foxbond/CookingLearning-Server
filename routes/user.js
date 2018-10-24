@@ -177,7 +177,7 @@ router.post('/register', function route_register(req, res) {
 
 					var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
-					db.query('INSERT INTO activationsessions VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?)', [userMail, token, (+new Date())], function db_addActivationSession(err) {
+					db.query('INSERT INTO usertokens VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?, 1)', [userMail, (+new Date()), token], function db_addActivationSession(err) {
 						if (err) {
 							return next(err);
 						}
@@ -241,7 +241,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 		});
 	}
 
-	db.query('SELECT userId, expiry FROM activationsessions WHERE token=?', [token], function db_getActivationSession(err, data) {
+	db.query('SELECT userId, tokenExpiry FROM usertokens WHERE tokenValue=? AND tokenType=1', [token], function db_getActivationSession(err, data) {
 		if (err) {
 			return next(err);
 		}
@@ -263,7 +263,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 				return next(err);
 			}
 
-			db.query('DELETE FROM activationsessions WHERE userId=?', [data[0].userId], function db_removeActivationSession(err) {
+			db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationSession(err) {
 				if (err) {
 					log.error('DB Query error! ("' + err.message + '")', err);
 				}
