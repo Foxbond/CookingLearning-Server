@@ -1,15 +1,15 @@
 'use strict';
 
-var bcrypt = require('bcrypt-nodejs');
-var express = require('express');
-var app = require('../app');
-var utils = require('../utils');
-var misc = require('../config/misc.cfg');
+const bcrypt = require('bcrypt-nodejs');
+const express = require('express');
+const app = require('../app');
+const utils = require('../utils');
+const misc = require('../config/misc.cfg');
 
-var log = app.locals.log;
-var db = app.locals.db;
+const log = app.locals.log;
+const db = app.locals.db;
 
-var router = express.Router({
+const router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
 	strict: app.get('strict routing')
 });
@@ -32,8 +32,7 @@ router.post('/login', function route_login(req, res, next) {
 	}
 	
 	//TODO: Sanitize input
-	var userMail = req.body.userMail.trim();
-	var userPassword = req.body.userPassword;
+	const userMail = req.body.userMail.trim();
 	
 	db.query('SELECT users.userName, users.userPassword, group_concat(usergroups.groupId) as userGroups '+
 		'FROM users '+ 
@@ -109,9 +108,9 @@ router.post('/register', function route_register(req, res) {
 		});
 	}
 	
-	var userName = req.body.userName.trim(); //TODO: Validate user name
-	var userMail = req.body.userMail.trim();
-	var userPassword = req.body.userPassword; //TODO: Check password complexity
+	const userName = req.body.userName.trim(); //TODO: Validate user name
+	const userMail = req.body.userMail.trim();
+	const userPassword = req.body.userPassword; //TODO: Check password complexity
 	
 	if (userName.length < 3 || userName.length > 20){
 		return res.render('user/register', { 
@@ -175,14 +174,14 @@ router.post('/register', function route_register(req, res) {
 						return next(err);
 					}
 
-					var token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
+					const token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
 					db.query('INSERT INTO usertokens VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?, 1)', [userMail, (+new Date()), token], function db_addActivationSession(err) {
 						if (err) {
 							return next(err);
 						}
 
-						var mail = {
+						let mail = {
 							from: misc.mailServerAddr,
 							to: userMail,
 							subject: 'Activate your account',
@@ -229,7 +228,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 		return res.redirect('/user');
 	}
 
-	var token = req.params.token.trim();
+	let token = req.params.token.trim();
 	if (token.length != 16) {
 		return res.render('user/activateForm', {
 			message: 'Invalid token'

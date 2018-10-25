@@ -1,8 +1,8 @@
-﻿var generateNav = require('../public/js/helpers').helpers.generateNav;
+﻿const generateNav = require('../public/js/helpers').helpers.generateNav;
 
-var url = '/admin';
-var url2 = '/admin/listusers';
-var url3 = '/admin/listusers/modify';
+const url = '/admin';
+const url2 = '/admin/listusers';
+const url3 = '/admin/listusers/modify';
 
 console.log(url);
 console.log(generateNav(url));

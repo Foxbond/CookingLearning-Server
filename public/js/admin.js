@@ -7,7 +7,7 @@
 	return this;
 };
 
-var admin = {};
+const admin = {};
 
 admin.init = function admin_init() {
 	//admin.showLoading();

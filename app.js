@@ -1,21 +1,21 @@
 'use strict';
 
-var express = require('express');
-var cookieParser = require('cookie-parser');
-var sessions = require('client-sessions');
-var exphbs = require('express-handlebars');
-var expressSlash = require('express-slash');
-var MailQueue = require('MailQueue');
-var path = require('path');
-var createError = require('http-errors');
-var misc = require('./config/misc.cfg');
-var morgan = require('morgan');
-var winston = require('winston');
-var mysql = require('mysql');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const sessions = require('client-sessions');
+const exphbs = require('express-handlebars');
+const expressSlash = require('express-slash');
+const MailQueue = require('MailQueue');
+const path = require('path');
+const createError = require('http-errors');
+const misc = require('./config/misc.cfg');
+const morgan = require('morgan');
+const winston = require('winston');
+const mysql = require('mysql');
 require('winston-daily-rotate-file');
 
 
-var winstonTransportFile = new winston.transports.DailyRotateFile({
+const winstonTransportFile = new winston.transports.DailyRotateFile({
 	level: 'info',
 	handleExceptions: true,
 	filename: 'logs/%DATE%.log',
@@ -30,7 +30,7 @@ var winstonTransportFile = new winston.transports.DailyRotateFile({
 			)
 });
 
-var log = winston.createLogger({
+const log = winston.createLogger({
 	transports: [
 		winstonTransportFile,
 		new winston.transports.Console({
@@ -54,7 +54,7 @@ var log = winston.createLogger({
 	exitOnError: false
 });
 
-var logFileOnly = winston.createLogger({
+const logFileOnly = winston.createLogger({
     transports: [winstonTransportFile],
 	exitOnError: false
 });
@@ -65,10 +65,10 @@ logFileOnly.stream = {
 	}
 };
 
-var db = mysql.createPool(require('./config/mysql.cfg'))
+const db = mysql.createPool(require('./config/mysql.cfg'))
 
 /******************** Express ********************/
-var app = express();
+const app = express();
 
 //I'm a masochist
 app.enable('strict routing');
@@ -128,11 +128,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 module.exports = app;
 
 /******************** Routes ********************/
-var redirectRouter = require('./routes/redirect');
-var indexRouter = require('./routes/index');
-var adminRouter = require('./routes/admin');
-var userRouter = require('./routes/user');
-var recipeRouter = require('./routes/recipe');
+const redirectRouter = require('./routes/redirect');
+const indexRouter = require('./routes/index');
+const adminRouter = require('./routes/admin');
+const userRouter = require('./routes/user');
+const recipeRouter = require('./routes/recipe');
 
 app.use(redirectRouter);
 app.use('/', indexRouter);

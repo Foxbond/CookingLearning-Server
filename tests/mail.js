@@ -1,7 +1,7 @@
-﻿var MailQueue = require('MailQueue');
-var misc = require('../config/misc.cfg');
+﻿const MailQueue = require('MailQueue');
+const misc = require('../config/misc.cfg');
 
-var mailQueue = new MailQueue({
+const mailQueue = new MailQueue({
 	db: require('../config/mysql.cfg'),
 	smtp: require('../config/smtp.cfg'),
 	//logger: log,
@@ -12,7 +12,7 @@ var mailQueue = new MailQueue({
 	defaultPriority: misc.mailDefaultPriority
 });
 
-var mail = {
+const mail = {
 	from: misc.mailServerAddr,
 	to: misc.mailDeveloperAddr,
 	subject: "Send Email Using Node.js",

@@ -1,13 +1,13 @@
 'use strict';
 
-var express = require('express');
-var app = require('../app');
-var createError = require('http-errors');
-var removeDiacritics = require('diacritics').remove;
+const express = require('express');
+const app = require('../app');
+const createError = require('http-errors');
+const removeDiacritics = require('diacritics').remove;
 
-var db = app.locals.db;
+const db = app.locals.db;
 
-var router = express.Router({
+const router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
 	strict: app.get('strict routing')
 });
@@ -33,7 +33,7 @@ router.get('/show/*', function route_root(req, res) {
 });//router.get('/show/*
 
 router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
-	var recipeId = parseInt(req.params.recipeId);
+	const recipeId = parseInt(req.params.recipeId);
 	if (recipeId <= 0) {
 		return next();
 	}
@@ -52,7 +52,7 @@ router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 });//router.get('/:recipeId(\\d+)
 
 router.get('/:recipeId(\\d+)/:recipeUrl', function route_showFull(req, res, next) {
-	var recipeId = parseInt(req.params.recipeId);
+	const recipeId = parseInt(req.params.recipeId);
 	if (recipeId <= 0) {
 		return next();
 	}
@@ -97,7 +97,7 @@ router.get('/edit', function route_edit(req, res) {
 });//router.get('/edit
 
 router.get('/edit/:recipeId(\\d+)', function route_edit(req, res, next) {
-	var recipeId = parseInt(req.params.recipeId);
+	const recipeId = parseInt(req.params.recipeId);
 	if (recipeId <= 0) {
 		return next();
 	}

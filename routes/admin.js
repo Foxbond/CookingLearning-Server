@@ -1,16 +1,16 @@
 'use strict';
 
-var express = require('express');
-var bcrypt = require('bcrypt-nodejs');
-var getFolderSize = require('get-folder-size');
-var async = require('async');
-var app = require('../app');
-var createError = require('http-errors');
+const express = require('express');
+const bcrypt = require('bcrypt-nodejs');
+const getFolderSize = require('get-folder-size');
+const async = require('async');
+const app = require('../app');
+const createError = require('http-errors');
 
-var log = app.locals.log;
-var db = app.locals.db;
+const log = app.locals.log;
+const db = app.locals.db;
 
-var router = express.Router({
+let router = express.Router({
 	caseSensitive: app.get('case sensitive routing'),
 	strict: app.get('strict routing')
 });
@@ -79,10 +79,10 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 	}
 	
 	//TODO: Maybe sanitize input?
-	var userMail = req.body.userMail.trim();
-	var userName = req.body.userName.trim();
-	var userPassword = req.body.userPassword.trim();
-	var userActive = (req.body.userActive == 'on');
+	const userMail = req.body.userMail.trim();
+	const userName = req.body.userName.trim();
+	const userPassword = req.body.userPassword.trim();
+	const userActive = (req.body.userActive == 'on');
 	
 	bcrypt.hash(userPassword, null, null, function hashPassword(err, hash) {
 		if (err){
@@ -140,7 +140,7 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 });//router.post('/manageUsers/create'
 
 router.get('/manageUsers/modify/:userId', function router_manageUsers_modify(req, res, next) {
-	var userId = parseInt(req.params.userId);
+	const userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
@@ -159,7 +159,7 @@ router.get('/manageUsers/modify/:userId', function router_manageUsers_modify(req
 				return res.redirect('/admin/manageUsers');
 			}
 
-			var groups = data[0].userGroups.split(',');
+			const groups = data[0].userGroups.split(',');
 
 			res.render('admin/modifyUser', {
 				userData: data[0],
@@ -170,7 +170,7 @@ router.get('/manageUsers/modify/:userId', function router_manageUsers_modify(req
 });//router.get('/manageUsers/modify/:userId'
 
 router.post('/manageUsers/modify/:userId', function route_manageUsers_modify(req, res, next) {
-	var userId = parseInt(req.params.userId);
+	const userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
@@ -189,7 +189,7 @@ router.post('/manageUsers/modify/:userId', function route_manageUsers_modify(req
 });//router.post('/manageUsers/modify/:userId'
 
 router.get('/manageUsers/remove/:userId', function route_manageUsers_remove(req, res, next) {
-	var userId = parseInt(req.params.userId);
+	const userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
@@ -217,7 +217,7 @@ router.get('/manageUsers/remove/:userId', function route_manageUsers_remove(req,
 });//router.get('/manageUsers/remove/:userId'
 
 router.post('/manageUsers/remove/:userId', function route_manageUsers_remove(req, res, next) {
-	var userId = parseInt(req.params.userId);
+	const userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
@@ -236,7 +236,7 @@ router.post('/manageUsers/remove/:userId', function route_manageUsers_remove(req
 });//router.post('/manageUsers/remove/:userId'
 
 router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(req, res, next) {
-	var userId = parseInt(req.params.userId);
+	const userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}
@@ -255,7 +255,7 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 			return res.redirect('/admin/manageUsers');
 		}
 
-		var groups = data[0].userGroups.split(',');
+		let groups = data[0].userGroups.split(',');
 
 		async.series([
 			function activateAccount(callback) {
@@ -303,7 +303,7 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 });//router.get('/manageUsers/activate/:userId'
 
 router.get('/manageUsers/suspend/:userId', function route_manageUsers_suspend(req, res, next) {
-	var userId = parseInt(req.params.userId);
+	const userId = parseInt(req.params.userId);
 	if (userId <= 0) {
 		return res.redirect('/admin/manageUsers');
 	}

@@ -1,5 +1,5 @@
-var mysql      = require('mysql');
-var db = mysql.createConnection(require('../config/mysql.cfg'));
+const mysql      = require('mysql');
+const db = mysql.createConnection(require('../config/mysql.cfg'));
 
 db.connect(function (err){
 	if (err){

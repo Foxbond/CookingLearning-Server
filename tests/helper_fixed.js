@@ -1,6 +1,6 @@
-﻿var fixed = require('../public/js/helpers').helpers.fixed;
+﻿const fixed = require('../public/js/helpers').helpers.fixed;
 
-var values = [
+const values = [
 	10, '10',
 	1.1, '1.1',
 	2.22, '2.22',
