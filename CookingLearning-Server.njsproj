@@ -73,6 +73,8 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="views\user.hbs" />
+    <Content Include="views\user\recover_passwordForm.hbs" />
+    <Content Include="views\user\recover.hbs" />
     <Content Include="views\user\activateForm.hbs" />
     <Content Include="views\user\login.hbs" />
     <Content Include="views\user\register.hbs" />

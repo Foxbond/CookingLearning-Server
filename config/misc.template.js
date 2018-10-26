@@ -11,4 +11,5 @@
 	mailBatchLimit: 10,
 	mailDefaultPriority: 0,
 	activationTokenExpiry: 48 * 60 * 60 * 1000, //2d
+	recoveryTokenExpiry: 24 * 60 * 60 * 1000 //1d
 };

@@ -37,12 +37,13 @@ router.post('/login', function route_login(req, res, next) {
 	db.query('SELECT users.userName, users.userPassword, group_concat(usergroups.groupId) as userGroups '+
 		'FROM users '+ 
 		'LEFT JOIN usergroups on usergroups.userId=users.userId '+
-		'WHERE users.userMail=?', [userMail], function db_getUserData(err, data){
+		'WHERE users.userMail=? ' +
+		'GROUP BY users.userId', [userMail], function db_getUserData(err, data) {
 		if (err) {
 			return next(err);
 		}
 		
-		if(data.length == 0){
+		if(data.length != 1){
 			return res.render('user/login', {message:'Unknown mail'});// There is no need to hide this information behind something like "unknown user and/or password"
 		}
 		
@@ -144,7 +145,7 @@ router.post('/register', function route_register(req, res) {
 	
 	bcrypt.hash(userPassword, null, null, function hashPassword(err, hash) {
 		if (err){
-			log.error('Unable to compute hash! ("'+err+'")');
+			log.error('Unable to compute hash! ("'+err.message+'")', err);
 			return next(createError(500)); 
 		}
 		
@@ -176,7 +177,7 @@ router.post('/register', function route_register(req, res) {
 
 					const token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
-					db.query('INSERT INTO usertokens VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?, 1)', [userMail, (+new Date()), token], function db_addActivationSession(err) {
+					db.query('INSERT INTO usertokens VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?, 1)', [userMail, (+new Date()), token], function db_addActivationToken(err) {
 						if (err) {
 							return next(err);
 						}
@@ -235,7 +236,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 		});
 	}
 
-	db.query('SELECT userId, tokenCreated FROM usertokens WHERE tokenValue=? AND tokenType=1', [token], function db_getActivationSession(err, data) {
+	db.query('SELECT userId, tokenCreated FROM usertokens WHERE tokenValue=? AND tokenType=1', [token], function db_getActivationToken(err, data) {
 		if (err) {
 			return next(err);
 		}
@@ -257,7 +258,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 				return next(err);
 			}
 
-			db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationSession(err) {
+			db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationTokens(err) {
 				if (err) {
 					log.error('DB Query error! ("' + err.message + '")', err);
 				}
@@ -269,8 +270,155 @@ router.get('/activate/:token', function route_activate(req, res) {
 			});
 		});
 	});
-
 });//router.get('/activate/:token'
+
+router.get('/recover', function route_recover(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
+	res.render('user/recover');
+});//router.get('/recover
+
+router.post('/recover', function route_recover(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
+	if (!req.body.userMail) {
+		return res.render('user/recover', {
+			message: 'Please provide e-mail address!'
+		});
+	}
+
+	const userMail = req.body.userMail.trim();
+
+	if (!utils.validate.mail(userMail)) {
+		return res.render('user/recover', {
+			message: 'Provide correct e-mail address!'
+		});
+	}
+
+	db.query('SELECT users.userId, group_concat(usergroups.groupId) as userGroups ' +
+	'FROM users ' +
+	'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
+	'WHERE users.userMail=? ' +
+	'GROUP BY users.userId', [userMail], function db_checkMail(err, data) {
+		if (err) {
+			return next(err);
+		}
+
+		if (data.length != 1) {
+			return res.render('user/recover', {
+				message: 'User with specified e-mail cannot be found!',
+				email: userMail
+			});
+		}
+
+		if (data[0].userId == 1) {
+			return res.render('user/recover', { message: "I'm sorry, Dave. I'm afraid I can't do that." });
+		}
+
+		const userGroups = data[0].userGroups.split(',');
+
+		if (utils.contains(userGroups, ['3', '4'])) {
+			return res.render('user/recover', { message: 'Your account is disabled and/or banned! Please contact support.' });
+		}
+
+		if (utils.contains(userGroups, ['2'])) {
+			return res.render('user/recover', { message: 'Your account is not activated!' });//TODO: Provide resend option
+		}
+
+		const token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
+
+		db.query('INSERT INTO usertokens VALUES (?, ?, ?, 2)', [data[0].userId, (+new Date()), token], function db_addRecoveryToken(err) {
+			if (err) {
+				return next(err);
+			}
+
+			let mail = {
+				from: misc.mailServerAddr,
+				to: userMail,
+				subject: 'Recover your account',
+				text: 'Recovery token: ' + token + ' \r\nGo to ' + misc.serverAddr + '/user/recover/' + token + ' to activate your account.',
+				html: 'Recovery token: <b>' + token + '</b><br><a href="' + misc.serverAddr + '/user/recover/' + token + '">Click here</a> to recover your account.'//TODO: Use handlebars tpls for mails
+			}
+
+			req.app.locals.mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
+				if (err) {
+					return next(err);
+				}
+
+				res.render('user/recover', { message: 'Mail with instructions has been sent!', hideForm:true });
+			});
+		});
+	});
+});//router.post('/recover
+
+router.all('/recover/:token', function route_recover(req, res) {
+	if (req.session && req.session.user) {
+		return res.redirect('/user');
+	}
+
+	let token = req.params.token.trim();
+	if (token.length != 16) {
+		return res.render('user/recover', {
+			message: 'Invalid token'
+		});
+	}
+
+	db.query('SELECT userId, tokenCreated FROM usertokens WHERE tokenValue=? AND tokenType=2', [token], function db_getRecoveryToken(err, data) {
+		if (err) {
+			return next(err);
+		}
+
+		if (data.length != 1) {
+			return res.render('user/recover', { message: 'Invalid token' });
+		}
+
+		if (data[0].tokenCreated + misc.recoveryTokenExpiry < (+new Date())) {
+			return res.render('user/recover', { message: 'Token expired' });
+		}
+
+		if (req.method === 'GET') {
+			return res.render('user/recover_passwordForm', { token: token });
+		}
+
+		if (!req.body.userPassword || !req.body.userPassword2) {
+			return res.render('user/recover_passwordForm', { message: 'Fill all fields!' });
+		}
+
+		if (req.body.userPassword !== req.body.userPassword2) {
+			return res.render('user/recover_passwordForm', { message: 'Passwords dont match!' });
+		}
+
+		const userPassword = req.body.userPassword; //TODO: Check password complexity
+
+		bcrypt.hash(userPassword, null, null, function hashPassword(err, hash) {
+			if (err) {
+				log.error('Unable to compute hash! ("' + err.message + '")', err);
+				return next(createError(500));
+			}
+
+			db.query('UPDATE users SET userPassword=? WHERE userId=?', [hash, data[0].userId], function db_updateUserPassword(err) {
+				if (err) {
+					return next(err);
+				}
+
+				db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=2', [data[0].userId], function db_removeRecoveryTokens(err) {
+					if (err) {
+						log.error('DB Query error! ("' + err.message + '")', err);
+					}
+				});
+
+				return res.render('user/recover_passwordForm', {
+					message: 'Success!',
+					hideForm: true
+				});
+			});
+		});
+	});
+});//router.all('/recover/:token
 
 router.all('*', function route_star(req, res, next){
 	if (!req.session || !req.session.user){

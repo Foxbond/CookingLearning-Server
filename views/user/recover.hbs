@@ -1,0 +1,11 @@
+<h1>Recover account</h1>
+<p>{{message}}</p>
+{{#unless hideForm}}
+<p>
+	<form method="POST" action="/user/recover">
+		E-mail address: <input name="userMail" type="email" value="{{email}}">
+		<input type="submit" value="Recover">
+	</form><br />
+	<a href="/user/login">Login here</a>
+</p>
+{{/unless}}
