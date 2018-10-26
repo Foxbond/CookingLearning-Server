@@ -39,9 +39,7 @@ router.post('/login', function route_login(req, res, next) {
 		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
 		'WHERE users.userMail=? ' +
 		'GROUP BY users.userId', [userMail], function db_getUserData(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data.length != 1) {
 				return res.render('user/login', { message: 'Unknown mail' });// There is no need to hide this information behind something like "unknown user and/or password"
@@ -150,9 +148,7 @@ router.post('/register', function route_register(req, res) {
 		}
 
 		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data[0].c != 0) {
 				return res.render('user/register', {
@@ -165,22 +161,16 @@ router.post('/register', function route_register(req, res) {
 			}
 
 			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data) {
-				if (err) {
-					return next(err);
-				}
+				if (err) { return next(err); }
 
 				//TODO: Second query AND mail AND page rendering can be run in parallel
 				db.query('INSERT INTO usergroups VALUES (?, 1), (?, 2)', [data.insertId, data.insertId], function db_insertGroups(err) {
-					if (err) {
-						return next(err);
-					}
+					if (err) { return next(err); }
 
 					const token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
 					db.query('INSERT INTO usertokens VALUES ((SELECT userId FROM users WHERE userMail=?), ?, ?, 1)', [userMail, (+new Date()), token], function db_addActivationToken(err) {
-						if (err) {
-							return next(err);
-						}
+						if (err) { return next(err); }
 
 						let mail = {
 							from: misc.mailServerAddr,
@@ -191,9 +181,7 @@ router.post('/register', function route_register(req, res) {
 						}
 
 						req.app.locals.mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
-							if (err) {
-								return next(err);
-							}
+							if (err) { return next(err); }
 
 							res.render('user/registerComplete');
 						});
@@ -237,9 +225,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 	}
 
 	db.query('SELECT userId, tokenCreated FROM usertokens WHERE tokenValue=? AND tokenType=1', [token], function db_getActivationToken(err, data) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		if (data.length != 1) {
 			return res.render('user/activateForm', {
@@ -254,9 +240,7 @@ router.get('/activate/:token', function route_activate(req, res) {
 		}
 
 		db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function db_removeUserGroup(err) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationTokens(err) {
 				if (err) {
@@ -286,17 +270,13 @@ router.post('/recover', function route_recover(req, res) {
 	}
 
 	if (!req.body.userMail) {
-		return res.render('user/recover', {
-			message: 'Please provide e-mail address!'
-		});
+		return res.render('user/recover', { message: 'Please provide e-mail address!' });
 	}
 
 	const userMail = req.body.userMail.trim();
 
 	if (!utils.validate.mail(userMail)) {
-		return res.render('user/recover', {
-			message: 'Provide correct e-mail address!'
-		});
+		return res.render('user/recover', { message: 'Provide correct e-mail address!' });
 	}
 
 	db.query('SELECT users.userId, group_concat(usergroups.groupId) as userGroups ' +
@@ -304,9 +284,7 @@ router.post('/recover', function route_recover(req, res) {
 		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
 		'WHERE users.userMail=? ' +
 		'GROUP BY users.userId', [userMail], function db_checkMail(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data.length != 1) {
 				return res.render('user/recover', {
@@ -332,9 +310,7 @@ router.post('/recover', function route_recover(req, res) {
 			const token = require('nanoid/generate')('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 
 			db.query('INSERT INTO usertokens VALUES (?, ?, ?, 2)', [data[0].userId, (+new Date()), token], function db_addRecoveryToken(err) {
-				if (err) {
-					return next(err);
-				}
+				if (err) { return next(err); }
 
 				let mail = {
 					from: misc.mailServerAddr,
@@ -345,9 +321,7 @@ router.post('/recover', function route_recover(req, res) {
 				}
 
 				req.app.locals.mailQueue.send([mail], function mail_sendActivationMail(err, mailIds) {
-					if (err) {
-						return next(err);
-					}
+					if (err) { return next(err); }
 
 					res.render('user/recover', { message: 'Mail with instructions has been sent!', hideForm: true });
 				});
@@ -368,9 +342,7 @@ router.all('/recover/:token', function route_recover(req, res) {
 	}
 
 	db.query('SELECT userId, tokenCreated FROM usertokens WHERE tokenValue=? AND tokenType=2', [token], function db_getRecoveryToken(err, data) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		if (data.length != 1) {
 			return res.render('user/recover', { message: 'Invalid token' });
@@ -401,9 +373,7 @@ router.all('/recover/:token', function route_recover(req, res) {
 			}
 
 			db.query('UPDATE users SET userPassword=? WHERE userId=?', [hash, data[0].userId], function db_updateUserPassword(err) {
-				if (err) {
-					return next(err);
-				}
+				if (err) { return next(err); }
 
 				db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=2', [data[0].userId], function db_removeRecoveryTokens(err) {
 					if (err) {

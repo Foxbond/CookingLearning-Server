@@ -39,9 +39,7 @@ router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 	}
 
 	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipeUrl(err, data) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		if (data.length != 1) {
 			return next();
@@ -58,9 +56,7 @@ router.get('/:recipeId(\\d+)/:recipeUrl', function route_showFull(req, res, next
 	}
 
 	db.query('SELECT recipeUrl FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipeUrl(err, data) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		if (data.length != 1) {
 			//TODO: Detect and redirect if user provides correct recipeUrl but wrong recipeId
@@ -74,9 +70,7 @@ router.get('/:recipeId(\\d+)/:recipeUrl', function route_showFull(req, res, next
 
 		//Maybe better fetch all information at once (during previous query)? I guess it depends how often users hit incorrect url
 		db.query('SELECT * FROM recipe WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			//Is this check really needed?
 			if (data.length != 1) {
@@ -103,9 +97,7 @@ router.get('/edit/:recipeId(\\d+)', function route_edit(req, res, next) {
 	}
 
 	db.query('SELECT * FROM recipes WHERE recipeId=?', [recipeId], function db_fetchRecipe(err, data) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		if (data.length != 1) {
 			return next();

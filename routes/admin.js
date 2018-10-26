@@ -48,9 +48,7 @@ router.get('/manageUsers', function route_manageUsers(req, res, next) {
 		'LEFT JOIN usergroups on usergroups.userId=users.userId ' +
 		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
 		'GROUP BY users.userId', function db_fetchUsers(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			res.render('admin/manageUsers', {
 				title: 'Admin - ManageUsers',
@@ -91,9 +89,7 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 		}
 
 		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data[0].c != 0) {
 				return res.render('admin/createUser', {
@@ -107,29 +103,19 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 			}
 
 			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data) {
-				if (err) {
-					return next(err);
-				}
+				if (err) { return next(err); }
 
 				db.query('INSERT INTO usergroups VALUES (?, 1)', [data.insertId], function db_setGroup(err) {
-					if (err) {
-						return next(err);
-					}
+					if (err) { return next(err); }
 
 					if (!userActive) {
 						db.query('INSERT INTO usergroups VALUES (?, 2)', [data.insertId], function db_setGroup(err) {
-							if (err) {
-								return next(err);
-							}
+							if (err) { return next(err); }
 
-							res.render('admin/createUser', {
-								message: 'User "' + userName + '" added!'
-							});
+							res.render('admin/createUser', { message: 'User "' + userName + '" added!' });
 						});
 					} else {
-						res.render('admin/createUser', {
-							message: 'User "' + userName + '" added!'
-						});
+						res.render('admin/createUser', { message: 'User "' + userName + '" added!' });
 					}
 
 
@@ -151,9 +137,7 @@ router.get('/manageUsers/modify/:userId', function router_manageUsers_modify(req
 		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
 		'WHERE users.userId=? ' +
 		'GROUP BY users.userId', [userId], function db_fetchUser(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data.length == 0) {
 				return res.redirect('/admin/manageUsers');
@@ -180,9 +164,7 @@ router.post('/manageUsers/modify/:userId', function route_manageUsers_modify(req
 	}
 
 	db.query('UPDATE users SET userName=?, userMail=? WHERE userId=?', [req.body.userName, req.body.userMail, userId], function db_updateUser(err) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		return res.redirect('/admin/manageUsers');
 	});
@@ -200,9 +182,7 @@ router.get('/manageUsers/remove/:userId', function route_manageUsers_remove(req,
 		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
 		'WHERE users.userId=? ' +
 		'GROUP BY users.userId', [userId], function db_fetchUser(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data.length == 0) {
 				return res.redirect('/admin/manageUsers');
@@ -227,9 +207,7 @@ router.post('/manageUsers/remove/:userId', function route_manageUsers_remove(req
 	}
 
 	db.query('DELETE FROM users WHERE userId=?', [userId], function db_removeUser(err) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		return res.redirect('/admin/manageUsers');
 	});
@@ -247,9 +225,7 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
 		'WHERE users.userId=? ' +
 		'GROUP BY users.userId', [userId], function db_fetchUser(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			if (data.length == 0) {
 				return res.redirect('/admin/manageUsers');
@@ -293,9 +269,7 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 						callback();
 					});
 				}], function userAccActivated(err) {
-					if (err) {
-						return next(err);
-					}
+					if (err) { return next(err); }
 
 					res.redirect('/admin/manageUsers/modify/' + data[0].userId);
 				});
@@ -311,9 +285,7 @@ router.get('/manageUsers/suspend/:userId', function route_manageUsers_suspend(re
 	//TODO: Check if user is already suspended
 
 	db.query('INSERT INTO usergroups VALUES (?, 4)', [userId], function db_addUserGroup(err) {
-		if (err) {
-			return next(err);
-		}
+		if (err) { return next(err); }
 
 		return res.redirect('/admin/manageUsers/modify/' + userId);
 	});
@@ -332,9 +304,7 @@ router.post('/stats', function route_stats(req, res, next) {
 		'sum(data_free) / 1024 / 1024 as dbFreeSpace ' +
 		'FROM information_schema.TABLES ' +
 		'GROUP BY table_schema; ', function db_getDbStats(err, data) {
-			if (err) {
-				return next(err);
-			}
+			if (err) { return next(err); }
 
 			getFolderSize('logs', function fs_getLogsSize(err, logsSize) {
 				res.render('admin/stats', {
