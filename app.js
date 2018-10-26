@@ -23,11 +23,11 @@ const winstonTransportFile = new winston.transports.DailyRotateFile({
 	maxFiles: '30',
 	zippedArchive: true,
 	format: winston.format.combine(
-				winston.format.timestamp({
-					format: 'YYYY-MM-DD HH:mm:ss'
-				}),
-				winston.format.json()
-			)
+		winston.format.timestamp({
+			format: 'YYYY-MM-DD HH:mm:ss'
+		}),
+		winston.format.json()
+	)
 });
 
 const log = winston.createLogger({
@@ -55,7 +55,7 @@ const log = winston.createLogger({
 });
 
 const logFileOnly = winston.createLogger({
-    transports: [winstonTransportFile],
+	transports: [winstonTransportFile],
 	exitOnError: false
 });
 
@@ -91,7 +91,7 @@ app.locals.mailQueue = new MailQueue({
 
 //Let's meet
 app.disable('x-powered-by');
-app.use(function app_setServerHeaders(req, res, next){
+app.use(function app_setServerHeaders(req, res, next) {
 	res.setHeader('Server', misc.serverName);
 	res.setHeader('X-Powered-By', misc.serverName);
 	/* res.setHeader('Access-Control-Allow-Origin', ''); */
@@ -116,8 +116,8 @@ app.use(morgan('dev'));
 app.use(sessions({
 	cookieName: 'session',
 	secret: misc.cookieKey,
-	duration:   misc.cookieDuration, 
-	activeDuration: misc.cookieActiveDuration 
+	duration: misc.cookieDuration,
+	activeDuration: misc.cookieActiveDuration
 }));
 
 app.use(express.json());
@@ -171,8 +171,8 @@ app.use(function app_errorHandler(err, req, res, next) {
 			res.locals.errorMessage = err.message;
 		}
 		res.locals.error = {};
-	}	
-	
+	}
+
 	// render the error page
 	res.status(err.status || 500);
 	res.render('error');

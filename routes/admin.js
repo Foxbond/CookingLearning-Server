@@ -15,28 +15,28 @@ let router = express.Router({
 	strict: app.get('strict routing')
 });
 
-router.all('*', function route_star(req, res, next){
-	if (!req.session || !req.session.user){
+router.all('*', function route_star(req, res, next) {
+	if (!req.session || !req.session.user) {
 		return res.redirect('/user/login');
 	}
-	
-	if (req.session.user.toLowerCase() != 'foxbond'){
-		log.info('Denied access to "'+req.originalUrl+'" for "'+req.session.user+'" ');
+
+	if (req.session.user.toLowerCase() != 'foxbond') {
+		log.info('Denied access to "' + req.originalUrl + '" for "' + req.session.user + '" ');
 		return next(createError(403));
 	}
 
 	res.locals.layout = 'admin';
 	res.locals.title = 'Admin';
 	res.locals.originalUrl = req.originalUrl;
-	
+
 	next();
 });//router.all('*'
 
 router.get('/', function route_root(req, res) {
-	res.render('admin/index', {title: 'Admin - Index'});
+	res.render('admin/index', { title: 'Admin - Index' });
 });
 
-router.all('/manageUsers', function route_manageUsers(req, res, next){
+router.all('/manageUsers', function route_manageUsers(req, res, next) {
 	res.locals.title = 'Admin - ManageUsers';
 	next();
 });
@@ -65,39 +65,39 @@ router.get('/manageUsers/create', function route_manageUsers_create(req, res) {
 });
 
 router.post('/manageUsers/create', function route_manageUsers_create(req, res, next) {
-	
-	if (!req.body.userMail || !req.body.userName || !req.body.userPassword){
-		return res.render('admin/createUser', { 
-				message: 'Fill all fields!', 
-				_form: {
-					mail: req.body.userMail,
-					name: req.body.userName,
-					password: req.body.userPassword,
-					active: req.body.userActive=='on' ? 'checked' : ''
-				}
-			});
+
+	if (!req.body.userMail || !req.body.userName || !req.body.userPassword) {
+		return res.render('admin/createUser', {
+			message: 'Fill all fields!',
+			_form: {
+				mail: req.body.userMail,
+				name: req.body.userName,
+				password: req.body.userPassword,
+				active: req.body.userActive == 'on' ? 'checked' : ''
+			}
+		});
 	}
-	
+
 	//TODO: Maybe sanitize input?
 	const userMail = req.body.userMail.trim();
 	const userName = req.body.userName.trim();
 	const userPassword = req.body.userPassword.trim();
 	const userActive = (req.body.userActive == 'on');
-	
+
 	bcrypt.hash(userPassword, null, null, function hashPassword(err, hash) {
-		if (err){
-			log.error('Unable to compute hash! ("'+err+'")');
-			return next(createError(500)); 
+		if (err) {
+			log.error('Unable to compute hash! ("' + err + '")');
+			return next(createError(500));
 		}
-		
-		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data){
+
+		db.query('SELECT COUNT(*) as c FROM users WHERE userMail=?', [userMail], function db_checkMail(err, data) {
 			if (err) {
 				return next(err);
 			}
-			
-			if (data[0].c != 0){
-				return res.render('admin/createUser', { 
-					message: 'Mail already used!', 
+
+			if (data[0].c != 0) {
+				return res.render('admin/createUser', {
+					message: 'Mail already used!',
 					_form: {
 						mail: req.body.userMail,
 						name: req.body.userName,
@@ -105,13 +105,13 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 					}
 				});
 			}
-			
-			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data){
+
+			db.query('INSERT INTO users VALUES (NULL, ?, ?, ?)', [userMail, userName, hash], function db_insertUser(err, data) {
 				if (err) {
 					return next(err);
 				}
-				
-				db.query('INSERT INTO usergroups VALUES (?, 1)', [data.insertId], function db_setGroup(err){
+
+				db.query('INSERT INTO usergroups VALUES (?, 1)', [data.insertId], function db_setGroup(err) {
 					if (err) {
 						return next(err);
 					}
@@ -132,7 +132,7 @@ router.post('/manageUsers/create', function route_manageUsers_create(req, res, n
 						});
 					}
 
-					
+
 				});
 			});//db.insert
 		});//db.count
@@ -247,30 +247,44 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 		'LEFT JOIN groups on groups.groupId = usergroups.groupId ' +
 		'WHERE users.userId=? ' +
 		'GROUP BY users.userId', [userId], function db_fetchUser(err, data) {
-		if (err) {
-			return next(err);
-		}
+			if (err) {
+				return next(err);
+			}
 
-		if (data.length == 0) {
-			return res.redirect('/admin/manageUsers');
-		}
+			if (data.length == 0) {
+				return res.redirect('/admin/manageUsers');
+			}
 
-		let groups = data[0].userGroups.split(',');
+			let groups = data[0].userGroups.split(',');
 
-		async.series([
-			function activateAccount(callback) {
-				if (groups.indexOf('NotActivated') == -1) {
-					callback();
-					return;
-				}
-
-				db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function db_removeUserGroup(err) {
-					if (err) {
-						callback(err);
+			async.series([
+				function activateAccount(callback) {
+					if (groups.indexOf('NotActivated') == -1) {
+						callback();
 						return;
 					}
 
-					db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationSession(err) {
+					db.query('DELETE FROM usergroups WHERE userId=? AND groupId=2', [data[0].userId], function db_removeUserGroup(err) {
+						if (err) {
+							callback(err);
+							return;
+						}
+
+						db.query('DELETE FROM usertokens WHERE userId=? AND tokenType=1', [data[0].userId], function db_removeActivationSession(err) {
+							if (err) {
+								callback(err);
+								return;
+							}
+
+							callback();
+						});
+					});
+				}, function removeSuspension(callback) {
+					if (groups.indexOf('Suspended') == -1) {
+						callback();
+					}
+
+					db.query('DELETE FROM usergroups WHERE userId=? AND groupId=4', [data[0].userId], function db_removeUserGroup(err) {
 						if (err) {
 							callback(err);
 							return;
@@ -278,28 +292,14 @@ router.get('/manageUsers/activate/:userId', function route_manageUsers_activate(
 
 						callback();
 					});
-				});
-			}, function removeSuspension(callback) {
-				if (groups.indexOf('Suspended') == -1) {
-					callback();
-				}
-
-				db.query('DELETE FROM usergroups WHERE userId=? AND groupId=4', [data[0].userId], function db_removeUserGroup(err) {
+				}], function userAccActivated(err) {
 					if (err) {
-						callback(err);
-						return;
+						return next(err);
 					}
 
-					callback();
+					res.redirect('/admin/manageUsers/modify/' + data[0].userId);
 				});
-		}], function userAccActivated(err) {
-			if (err) {
-				return next(err);
-			}
-
-			res.redirect('/admin/manageUsers/modify/' + data[0].userId);
-		});	
-	});
+		});
 });//router.get('/manageUsers/activate/:userId'
 
 router.get('/manageUsers/suspend/:userId', function route_manageUsers_suspend(req, res, next) {
@@ -315,7 +315,7 @@ router.get('/manageUsers/suspend/:userId', function route_manageUsers_suspend(re
 			return next(err);
 		}
 
-		return res.redirect('/admin/manageUsers/modify/'+userId);
+		return res.redirect('/admin/manageUsers/modify/' + userId);
 	});
 });//router.get('/manageUsers/suspend/:userId'
 
@@ -342,7 +342,7 @@ router.post('/stats', function route_stats(req, res, next) {
 					logSize: logsSize / 1024 / 1024
 				});
 			});
-			
+
 		});
 });//router.get('/stats'
 

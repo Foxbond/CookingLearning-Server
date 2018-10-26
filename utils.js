@@ -2,33 +2,33 @@ const tester = /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}
 
 module.exports = {
 	validate: {
-		mail: function(email) {
+		mail: function (email) {
 			if (!email)
 				return false;
-				
-			if(email.length>254)
+
+			if (email.length > 254)
 				return false;
 
 			let valid = tester.test(email);
-			if(!valid)
+			if (!valid)
 				return false;
 
 			// Further checking of some things regex can't handle
 			const parts = email.split("@");
-			if(parts[0].length>64)
+			if (parts[0].length > 64)
 				return false;
 
 			const domainParts = parts[1].split(".");
-			if(domainParts.some(function(part) { return part.length>63; }))
+			if (domainParts.some(function (part) { return part.length > 63; }))
 				return false;
 
 			return true;
 		},
-		username: function (str){
+		username: function (str) {
 			if (typeof str !== 'string') {
 				throw new TypeError('Expected a string');
 			}
-			
+
 			return !/[^0-9a-z\xDF-\xFF \-\_]/.test(str.toLowerCase());
 			//return !/[^0-9a-z\xDF-\xFF]/.test(str.toLowerCase());
 		}

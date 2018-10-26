@@ -47,7 +47,7 @@ router.get('/:recipeId(\\d+)', function route_showShort(req, res, next) {
 			return next();
 		}
 
-		res.status(301).location('/recipe/'+recipeId+'/'+data[0].recipeUrl);
+		res.status(301).location('/recipe/' + recipeId + '/' + data[0].recipeUrl);
 	});
 });//router.get('/:recipeId(\\d+)
 
