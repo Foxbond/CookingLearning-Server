@@ -114,7 +114,8 @@ app.use(morgan('dev'));
 
 //sessions
 app.use(sessions({
-	cookieName: 'session',
+	cookieName: misc.cookieName,
+	requestKey: 'session',
 	secret: misc.cookieKey,
 	duration: misc.cookieDuration,
 	activeDuration: misc.cookieActiveDuration

@@ -1,6 +1,7 @@
 ﻿module.exports = {
 	serverAddr: 'http://localhost:3000',
 	serverName: 'Hidden',
+	cookieName: 'CookingLearning_session',
 	cookieKey: 'FOR DEBUG USE ONLY MUST BE CHANGED',
 	cookieDuration: 7 * 24 * 60 * 60 * 1000, //week
 	cookieActiveDuration: 28 * 60 * 60 * 1000, //1d+
