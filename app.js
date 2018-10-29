@@ -156,16 +156,22 @@ app.use(function app_errorHandler(err, req, res, next) {
 	//TODO: Pretty error for end user depending on err.message
 
 	if (req.app.get('env') === 'development') {
-		if (err.message.indexOf(':') != -1) {
-			res.locals.errorType = err.message.split(':')[0];
-			res.locals.errorMessage = err.message.split(':')[1];
+		//if (err.code == 'ER_PARSE_ERROR') {
+		if (err.sql) {
+			res.locals.error = err;
+			return res.render('error/sql', { layout: 'error' });
 		} else {
-			res.locals.errorMessage = err.message;
+			if (err.message.indexOf(':') != -1) {
+				res.locals.errorCode = err.code ? err.code : err.message.split(':')[0];
+				res.locals.errorMessage = err.message.split(':')[1];
+			} else {
+				res.locals.errorMessage = err.message;
+			}
+			res.locals.error = err;
 		}
-		res.locals.error = err;
 	} else {
 		if (err.message.indexOf(':') != -1) {
-			res.locals.errorType = err.message.split(':')[0];
+			res.locals.errorCode = err.message.split(':')[0];
 			res.locals.errorMessage = '';
 		} else {
 			res.locals.errorMessage = err.message;

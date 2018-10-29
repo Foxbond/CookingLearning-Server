@@ -30,6 +30,7 @@
     <Content Include="package.json" />
     <Content Include="public\images\loading.gif" />
     <Content Include="public\images\loadingL.gif" />
+    <Content Include="public\stylesheets\error.css" />
     <Content Include="public\stylesheets\admin.css">
       <SubType>Code</SubType>
     </Content>
@@ -60,7 +61,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="views\error.hbs" />
+    <Content Include="views\error\sql.hbs" />
     <Content Include="views\index.hbs" />
+    <Content Include="views\layouts\error.hbs" />
     <Content Include="views\layouts\admin.hbs">
       <SubType>Code</SubType>
     </Content>
@@ -93,6 +96,7 @@
     <Folder Include="views" />
     <Folder Include="views\admin" />
     <Folder Include="views\layouts" />
+    <Folder Include="views\error\" />
     <Folder Include="views\recipe\" />
     <Folder Include="views\partials" />
     <Folder Include="views\user" />
